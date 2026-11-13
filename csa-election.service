@@ -1,0 +1,22 @@
+[Unit]
+Description=CSA Election Web Platform - IUA
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/csa-election
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOST=127.0.0.1
+Environment=ADMIN_PATH=/csa-admin-panel
+Environment=ADMIN_PASSWORD=ChangeMe_StrongPassword123!
+EnvironmentFile=-/etc/csa-election.env
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+services:
+  csa-election:
+    build: .
+    container_name: csa-election-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - ADMIN_PATH=${ADMIN_PATH:-/csa-admin-panel}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-ChangeMe_StrongPassword123!}
+      # فعّل هذا السطر عند تشغيل المنصة خلف HTTPS أو بروكسي عكسي (Nginx/Cloudflare)
+      # - HTTPS=1
+      # - ALLOWED_ORIGINS=https://csa.iua.edu.sd
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables & local secrets
+.env
+.env.local
+.env.*.local
+
+# SQLite Database & Runtime Files
+data/*.db
+data/*.db-wal
+data/*.db-shm
+!data/.gitkeep
+
+# Logs & Debug
+*.log
+npm-debug.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini

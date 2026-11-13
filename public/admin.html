@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>غرفة التحكم | جمعية الحاسوب IUA</title>
+<meta name="theme-color" content="#061713">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/css/style.css?v=65">
+<style>
+/* ---------- تنسيقات غرفة التحكم ---------- */
+.login-veil{
+  position:fixed;inset:0;z-index:600;display:grid;place-items:center;padding:18px;
+  background:var(--grad-dark);
+}
+.login-veil.hide{display:none}
+.login-box{background:#fff;border-radius:28px;padding:34px 28px;width:min(420px,92%);text-align:center;
+  box-shadow:0 40px 90px rgba(0,0,0,.45);animation:min .4s cubic-bezier(.2,1.3,.4,1)}
+.login-box img{width:80px;margin:0 auto 14px;border-radius:14px;background:#fff;padding:8px}
+.login-box h2{font-size:1.3rem;font-weight:900;margin-bottom:4px}
+.login-box p{color:var(--ink-3);font-size:.88rem;margin-bottom:22px}
+.login-box .field{text-align:right;margin-bottom:14px}
+.login-box .btn{margin-top:6px}
+.err-line{color:var(--red);font-size:.84rem;font-weight:900;min-height:20px}
+
+.admin-wrap{display:none;min-height:100vh;background:#F4F7F6}
+.admin-wrap.on{display:flex;flex-direction:column}
+.side{
+  background:linear-gradient(180deg,#061713,#0A241D);color:#B7CEC7;padding:14px 12px;
+  display:flex;flex-direction:column;gap:6px;position:sticky;top:56px;z-index:150;
+}
+.side .brand{color:#fff;margin-bottom:16px;padding:0 4px;display:flex;align-items:center;gap:10px}
+.side .brand img{background:#fff;border-radius:10px;width:38px;height:38px}
+.side a.nav-i{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius);
+  font-size:.9rem;font-weight:700;transition:.2s;cursor:pointer;color:#B7CEC7;
+}
+.side a.nav-i:hover{background:rgba(255,255,255,.07);color:#fff}
+.side a.nav-i.on{background:var(--grad);color:#fff;box-shadow:var(--shadow-sm)}
+.side a.nav-i .badge{
+  margin-inline-start:auto;background:#F2A93B;color:#2B1B02;font-size:.68rem;
+  padding:2px 8px;border-radius:99px;font-weight:900;
+}
+.side .out{margin-top:auto;border-top:1px solid rgba(255,255,255,.1);padding-top:12px}
+.main{padding:20px 16px 90px;min-width:0;flex:1;overflow-y:auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.topbar h1{font-size:1.3rem;font-weight:900}
+.topbar p{color:var(--ink-3);font-size:.86rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:var(--grad)}
+.kpi b{display:block;font-size:1.7rem;font-weight:900;line-height:1.3}
+.kpi span{font-size:.82rem;color:var(--ink-3)}
+.kpi.warn::after{background:linear-gradient(180deg,#F2A93B,#E08A1B)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:18px;box-shadow:var(--shadow-sm)}
+.panel h3{font-size:1rem;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel h3 .sp{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{
+  padding:7px 16px;border-radius:99px;border:1.5px solid var(--line);background:#fff;
+  cursor:pointer;font-weight:700;font-size:.84rem;color:var(--ink-2);transition:.2s;
+}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th{text-align:right;padding:10px;background:#F7FAF9;color:var(--ink-3);font-weight:700;font-size:.76rem;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:hover td{background:#FBFDFC}
+.tbl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:16px;overflow-y:hidden}
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.72rem;font-weight:900;white-space:nowrap}
+.tag.ok{background:#E4F7EF;color:#0B6A4E}
+.tag.pend{background:#FFF4DC;color:#8A5A00}
+.tag.rej{background:#FDECEC;color:#B23434}
+.tag.blue{background:#E8F1FE;color:#1D4ED8}
+.mini{font-size:.74rem;color:var(--ink-3);display:block}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:.76rem;direction:ltr;text-align:left;display:block}
+.row-acts{display:flex;gap:6px;flex-wrap:wrap}
+.row-acts button,.row-acts a{
+  padding:5px 11px;border-radius:9px;border:1px solid var(--line);background:#fff;
+  cursor:pointer;font-size:.76rem;font-weight:700;color:var(--ink-2);transition:.15s;
+}
+.row-acts button:hover,.row-acts a:hover{border-color:var(--brand-300);color:var(--brand-700);background:var(--brand-50)}
+.row-acts button.danger:hover{border-color:#F3B5B5;color:var(--red);background:#FDECEC}
+.set-grid{display:grid;gap:12px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FBFDFC;
+  border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.switch b{font-size:.9rem;display:block}
+.switch span{font-size:.76rem;color:var(--ink-3)}
+.tgl{position:relative;width:48px;height:26px;flex-shrink:0}
+.tgl input{opacity:0;width:100%;height:100%;margin:0;cursor:pointer;position:absolute;z-index:2}
+.tgl i{position:absolute;inset:0;background:#D6E2DE;border-radius:99px;transition:.25s;pointer-events:none}
+.tgl i::after{content:"";position:absolute;top:3px;inset-inline-end:3px;width:20px;height:20px;
+  border-radius:50%;background:#fff;transition:.25s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tgl input:checked + i{background:var(--brand)}
+.tgl input:checked + i::after{transform:translateX(-22px)}
+[dir="rtl"] .tgl input:checked + i::after{transform:translateX(-22px)}
+.audit-i{display:flex;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--line);font-size:.84rem;flex-wrap:wrap}
+.audit-i .t{color:var(--ink-3);font-size:.72rem;white-space:nowrap}
+.audit-i .d{flex:1;min-width:180px}
+.audit-i .ip{font-family:ui-monospace,monospace;font-size:.72rem;background:#F3F7F6;padding:2px 8px;border-radius:7px;direction:ltr}
+.hidden{display:none!important}
+.pwBanner{
+  background:linear-gradient(135deg,#FFF4DC,#FFE8B8);border:1.5px solid #F5DFB3;
+  border-radius:18px;padding:14px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap
+}
+.pwBanner span{font-size:1.3rem}
+.pwBanner div{flex:1;min-width:180px}
+.pwBanner b{color:#6B4E17;font-weight:900;display:block}
+.pwBanner .mini{color:#8A6A2A;font-size:.8rem}
+.batchChart{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:18px}
+.batchChart .batch-row{display:grid;grid-template-columns:48px 1fr 64px;gap:10px;align-items:center;margin-bottom:10px}
+.batchChart .tag.blue{justify-self:start}
+.batchChart .bar{height:10px;background:var(--bg);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.batchChart .bar i{display:block;height:100%;background:var(--grad);border-radius:99px;transition:width .8s var(--ease)}
+.batchChart .mini{font-variant-numeric:tabular-nums;text-align:left}
+
+@media(max-width:640px){
+  .admin-wrap.on{flex-direction:column}
+  .side{position:fixed;top:56px;inset-inline:0;height:auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:10px 12px;scrollbar-width:none;z-index:140}
+  .side::-webkit-scrollbar{display:none}
+  .side .brand{width:auto;flex-shrink:0}
+  .side .brand span{display:none}
+  .side .brand img{width:34px;height:34px}
+  .side a.nav-i{padding:8px 12px;font-size:.82rem;white-space:nowrap;flex-shrink:0}
+  .side .out{margin:0;border:0;padding:0;width:auto;flex-shrink:0}
+  .main{padding-top:16px}
+  .set-grid{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr 1fr;gap:10px}
+  .kpi{padding:14px;border-radius:16px}
+  .kpi b{font-size:1.5rem}
+  .tabs button{padding:6px 12px;font-size:.78rem}
+  th, td{padding:8px 6px;font-size:.78rem}
+  .row-acts{gap:4px}
+  .row-acts button, .row-acts a{padding:6px 10px;font-size:.74rem}
+}
+</style>
+<style>
+@media(min-width:900px){
+  .admin-wrap.on{flex-direction:row;align-items:stretch}
+  .side{position:sticky;top:0;align-self:flex-start;width:260px;min-width:260px;height:100vh;overflow-y:auto;padding:24px 16px}
+  .side .brand{margin-bottom:24px}
+  .main{padding:30px clamp(24px,3vw,48px) 48px;height:100vh}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+  .panel{padding:24px;border-radius:24px;margin-bottom:22px}
+  .set-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+  .side{top:56px;min-height:58px;padding:8px 10px;gap:4px}
+  .side .brand{display:none}
+  .side a.nav-i{min-height:40px;padding:8px 11px;border-radius:13px}
+  .side a.nav-i .badge{font-size:.62rem;padding:1px 6px}
+  .main{padding:16px 12px calc(28px + env(safe-area-inset-bottom));margin-top:58px}
+  .topbar{align-items:flex-start}
+  .topbar h1{font-size:1.18rem}
+  .topbar .row-acts{width:100%}
+  .topbar .row-acts>*{flex:1;justify-content:center}
+  .panel{padding:14px;border-radius:18px}
+  .panel h3{align-items:flex-start}
+  .panel h3 .sp{width:100%;margin:8px 0 0;justify-content:flex-start}
+  .tbl-scroll{overscroll-behavior-inline:contain}
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .set-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){
+  .side a.nav-i{font-size:.74rem;padding-inline:9px}
+  .main{padding-inline:9px}
+  .cards{gap:8px}
+  .kpi{padding:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ تسجيل الدخول ============ -->
+<div class="login-veil" id="loginVeil">
+  <div class="login-box">
+    <img src="/logo.png" alt="شعار جمعية الحاسوب">
+    <h2>غرفة التحكم</h2>
+    <p>جمعية الحاسوب – جامعة إفريقيا العالمية</p>
+    <form id="loginForm">
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input class="input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <div class="err-line" id="loginErr"></div>
+      <button class="btn btn-primary btn-block btn-lg" id="loginBtn">دخول</button>
+    </form>
+    <p style="margin-top:16px;font-size:.78rem">الدخول مخصّص لرئيس الجمعية فقط · كل محاولة تُسجَّل بعنوان IP</p>
+  </div>
+</div>
+
+<!-- ============ التطبيق ============ -->
+<div class="admin-wrap" id="adminApp">
+  <aside class="side">
+    <a class="brand" href="/"><img src="/logo.png" alt="شعار">
+      <span>غرفة التحكم<small>CSA · IUA ADMIN</small></span></a>
+    <a class="nav-i on" data-p="dash">📊 نظرة عامة</a>
+    <a class="nav-i" data-p="cands">🎓 المرشحون <span class="badge hidden" id="bCand">0</span></a>
+    <a class="nav-i" data-p="votes">🗳 الأصوات والنتائج</a>
+    <a class="nav-i" data-p="msgs">✉ الردود والاستفسارات <span class="badge hidden" id="bMsg">0</span></a>
+    <a class="nav-i" data-p="audit">🕵 سجل الإجراءات و IP</a>
+    <a class="nav-i" data-p="security">🛡 مركز الأمان <span class="badge hidden" id="bSec">!</span></a>
+    <a class="nav-i" data-p="export">⬇ تصدير البيانات</a>
+    <a class="nav-i" data-p="settings">⚙ الإعدادات</a>
+    <div class="out">
+      <a class="nav-i" id="logoutBtn">↩ تسجيل الخروج</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div><h1 id="pageTitle">نظرة عامة</h1><p id="pageSub">ملخص حالة الانتخابات لحظياً</p></div>
+      <div class="row-acts">
+        <a href="/" target="_blank">↗ عرض الموقع</a>
+        <button id="refreshBtn">⟳ تحديث</button>
+      </div>
+    </div>
+
+    <!-- ===== نظرة عامة ===== -->
+    <section class="pg" id="p-dash">
+      <div id="pwBanner" class="hidden pwBanner">
+        <span>⚠️</span>
+        <div><b>ما زلت تستخدم كلمة المرور الافتراضية</b>
+          <span class="mini">غيّرها الآن من الإعدادات لحماية غرفة التحكم ونتائج الانتخابات.</span></div>
+        <button class="btn btn-dark btn-sm" data-go="settings">تغيير كلمة المرور</button>
+      </div>
+      <div class="cards" id="kpiBox"></div>
+      <div class="panel">
+        <h3>📊 توزيع التصويت حسب الدفعة</h3>
+        <div class="batchChart" id="batchChart"></div>
+      </div>
+      <div class="panel">
+        <h3>⚡ إجراءات سريعة</h3>
+        <div class="row-acts" style="gap:8px">
+          <button data-go="cands">مراجعة الترشيحات</button>
+          <button data-go="votes">عرض الأصوات والنتائج</button>
+          <button data-go="msgs">إدارة الردود</button>
+          <button data-go="export">تصدير CSV</button>
+          <button data-go="settings">إعدادات التصويت</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>🕐 آخر النشاطات</h3>
+        <div id="recentAudit"></div>
+      </div>
+    </section>
+
+    <!-- ===== المرشحون ===== -->
+    <section class="pg hidden" id="p-cands">
+      <div class="panel">
+        <h3>قائمة المرشحين
+          <span class="sp">
+            <div class="tabs" style="margin:0" id="candTabs">
+              <button class="on" data-s="all">الكل</button>
+              <button data-s="pending">بانتظار المراجعة</button>
+              <button data-s="approved">معتمد</button>
+              <button data-s="rejected">مرفوض</button>
+            </div>
+          </span>
+        </h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr>
+              <th>الحالة</th><th>الاسم</th><th>الرقم الجامعي</th><th>الدفعة</th>
+              <th>الواتساب</th><th>المؤهلات والخبرات</th><th>الهاتف / الجهاز و IP</th><th>إجراءات</th>
+            </tr></thead>
+            <tbody id="candRows"><tr><td colspan="8">جارِ التحميل…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== الأصوات والنتائج ===== -->
+    <section class="pg hidden" id="p-votes">
+      <div class="cards" id="voteKpi"></div>
+      <div class="panel">
+        <h3>🏆 النتائج المتقدمة
+          <span class="sp">
+            <button data-export="results">⬇ تصدير النتائج</button>
+            <button class="danger" id="clearVotesBtn" style="color:var(--red)">🗑 مسح كل الأصوات</button>
+          </span>
+        </h3>
+        <div id="adminResults"></div>
+      </div>
+      <div class="panel">
+        <h3>سجل المصوتين (بالاسم والرقم و IP)
+          <span class="sp"><button data-export="votes">⬇ تصدير CSV</button></span>
+        </h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>#</th><th>المصوّت</th><th>رقم جامعي</th><th>الدفعة</th>
+              <th>صوّت لـ</th><th>سبب الاختيار</th><th>الإيصال</th><th>الهاتف / الجهاز و IP</th><th>الوقت</th><th></th></tr></thead>
+            <tbody id="voteRows"><tr><td colspan="10">جارِ التحميل…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== الرسائل ===== -->
+    <section class="pg hidden" id="p-msgs">
+      <div class="panel">
+        <h3>الرسائل الواردة والاستفسارات
+          <span class="sp"><button data-export="messages">⬇ تصدير CSV</button></span>
+        </h3>
+        <div id="msgList"><p style="color:var(--ink-3)">جارِ التحميل…</p></div>
+      </div>
+    </section>
+
+    <!-- ===== سجل الإجراءات ===== -->
+    <section class="pg hidden" id="p-audit">
+      <div class="panel">
+        <h3>كل إجراء تم في الموقع مع IP
+          <span class="sp"><button data-export="audit">⬇ تصدير CSV</button></span>
+        </h3>
+        <div id="auditList"><p style="color:var(--ink-3)">جارِ التحميل…</p></div>
+      </div>
+    </section>
+
+    <!-- ===== مركز الأمان ===== -->
+    <section class="pg hidden" id="p-security">
+      <div class="cards" id="secKpi"></div>
+      <div class="panel">
+        <h3>🛡 فحص الحماية
+          <span class="sp"><button id="secRefresh">⟳ إعادة الفحص</button></span>
+        </h3>
+        <div id="secChecklist"></div>
+      </div>
+      <div class="panel">
+        <h3>🔑 الجلسات النشطة
+          <span class="sp"><button id="revokeOthers" class="danger" style="color:var(--red)">⏏ إنهاء الجلسات الأخرى</button></span>
+        </h3>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>الحالة</th><th>بُدأت</th><th>تنتهي</th><th>IP</th></tr></thead>
+            <tbody id="sessRows"><tr><td colspan="4">جارِ التحميل…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>🚨 محاولات دخول فاشلة (24 ساعة)</h3>
+        <div id="failedList"><p style="color:var(--ink-3)">جارِ التحميل…</p></div>
+      </div>
+    </section>
+
+    <!-- ===== التصدير ===== -->
+    <section class="pg hidden" id="p-export">
+      <div class="panel">
+        <h3>تصدير البيانات للتحقق من الأمانة</h3>
+        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:14px">
+          جميع الملفات بصيغة CSV متوافقة مع Excel و Google Sheets، وتحتوي على IP وكل بيانات من قام بالإجراء.
+        </p>
+        <div class="set-grid">
+          <div class="switch" style="grid-column:1/-1;background:linear-gradient(135deg,#E4F7EF,#D6F2E8);border-color:#4BC49B">
+            <div>
+              <b style="color:#0B6A4E;font-size:1rem">📜 طباعة محضر الانتخابات الرسمي المعتمد</b>
+              <span style="color:#1C5243">توليد وثيقة رسمية جاهزة للطباعة والاعتماد الإداري.</span>
+            </div>
+            <button class="btn btn-primary btn-sm" id="printReportBtn">🖨️ توليد وطباعة المحضر</button>
+          </div>
+          <div class="switch"><div><b>🎓 بيانات المرشحين</b><span>الاسم، الرقم، الواتساب، المؤهلات، الحالة، IP</span></div>
+            <button class="btn btn-primary btn-sm" data-export="candidates">تنزيل CSV</button></div>
+          <div class="switch"><div><b>🗳 بيانات المصوتين والأسباب</b><span>الاسم، الرقم، الدفعة، المرشح، سبب الاختيار، IP</span></div>
+            <button class="btn btn-primary btn-sm" data-export="votes">تنزيل CSV</button></div>
+          <div class="switch"><div><b>🏆 ملف النتائج الحالية</b><span>الترتيب، الأصوات، النسب، إجمالي كل دفعة</span></div>
+            <button class="btn btn-primary btn-sm" data-export="results">تنزيل CSV</button></div>
+          <div class="switch"><div><b>✉ الرسائل والردود</b><span>الرسائل الواردة وردودك عليها مع IP</span></div>
+            <button class="btn btn-primary btn-sm" data-export="messages">تنزيل CSV</button></div>
+          <div class="switch"><div><b>🕵 سجل الإجراءات الكامل</b><span>كل عملية ترشيح وتصويت وتعديل مع IP والمتصفح</span></div>
+            <button class="btn btn-primary btn-sm" data-export="audit">تنزيل CSV</button></div>
+          <div class="switch"><div><b>🗂 نسخة احتياطية JSON</b><span>للاحتفاظ بنسخة كاملة من قاعدة البيانات</span></div>
+            <button class="btn btn-dark btn-sm" id="backupBtn">تنزيل JSON</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== الإعدادات المتقدمة ===== -->
+    <section class="pg hidden" id="p-settings">
+      <!-- 1. أبواب الموقع والمفاتيح الكبرى -->
+      <div class="panel">
+        <h3>المفاتيح التشغيلية الكبرى للمنصة</h3>
+        <div class="set-grid">
+          <div class="switch"><div><b>فتح الاقتراع والتصويت</b><span>السماح للطلاب المؤهلين بالتصويت الفوري</span></div>
+            <label class="tgl"><input type="checkbox" id="sw-voting"><i></i></label></div>
+          <div class="switch"><div><b>فتح باب الترشيح الرئاسي</b><span>السماح بتقديم طلبات ترشح جديدة</span></div>
+            <label class="tgl"><input type="checkbox" id="sw-nom"><i></i></label></div>
+          <div class="switch"><div><b>إعلان النتائج للجمهور</b><span>إظهار الفرز والنسب في واجهة الموقع العام</span></div>
+            <label class="tgl"><input type="checkbox" id="sw-res"><i></i></label></div>
+          <div class="switch"><div><b>اعتماد الترشيح تلقائياً</b><span>اعتماد المرشح فور تسجيله دون الحاجة لمراجعة</span></div>
+            <label class="tgl"><input type="checkbox" id="sw-auto"><i></i></label></div>
+        </div>
+      </div>
+
+      <!-- 2. موعد إغلاق التصويت التلقائي -->
+      <div class="panel">
+        <h3>الموعد النهائي لإغلاق التصويت</h3>
+        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
+          عند الوصول إلى هذا الموعد يُغلق الاقتراع تلقائياً على مستوى الخادم وتتوقف استقبال الأصوات.
+        </p>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end">
+          <div class="field"><label>التاريخ والوقت المحدد</label>
+            <input class="input" type="datetime-local" id="set-deadline"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" id="saveDeadline">حفظ الموعد</button>
+            <button class="btn btn-ghost" id="clearDeadline">مسح</button>
+          </div>
+        </div>
+        <p class="mini" id="deadlineState" style="margin-top:10px"></p>
+      </div>
+
+      <!-- 3. شريط التنبيه والإعلان العاجل -->
+      <div class="panel">
+        <h3>شريط الإعلان والتنبيه العاجل للطلاب</h3>
+        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
+          يظهر هذا الشريط في أعلى تطبيق الويب العام فور تفعيله لتبليغ الطلاب بالمستجدات أو التنبيهات الرئاسية العاجلة.
+        </p>
+        <div class="set-grid" style="margin-bottom:14px">
+          <div class="switch"><div><b>تفعيل الشريط العاجل</b><span>إظهار الشريط الإعلاني في أعلى واجهة الموقع</span></div>
+            <label class="tgl"><input type="checkbox" id="sw-banner-enabled"><i></i></label></div>
+        </div>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 200px;gap:12px">
+          <div class="field"><label>نص التنبيه أو الإعلان العاجل</label>
+            <input class="input" id="set-banner_text" placeholder="مثال: تنبيه رئاسي: متبقي ساعتان على إغلاق باب الاقتراع" maxlength="200"></div>
+          <div class="field"><label>نوع / مستوى التنبيه</label>
+            <select class="select" id="set-banner_level">
+              <option value="info">إرشادي / إخباري (Info)</option>
+              <option value="warning">تنبيه هام (Warning)</option>
+              <option value="danger">عاجل وطارئ (Critical)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="saveBanner" style="margin-top:12px">حفظ إعدادات التنبيه العاجل</button>
+      </div>
+
+      <!-- 4. الهوية والنصوص والميثاق الرئاسي -->
+      <div class="panel">
+        <h3>الهوية والمؤسسة والميثاق الرئاسي</h3>
+        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
+          التحكم الكامل في النصوص، الميثاق الرئاسي، وبيانات الصرح الأكاديمي.
+        </p>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>عنوان المنصة (في شريط المتصفح)</label><input class="input" id="set-election_title" maxlength="120"></div>
+          <div class="field"><label>عنوان الهيرو الرئيسي</label><input class="input" id="set-hero_title" maxlength="90"></div>
+          <div class="field" style="grid-column:1/-1"><label>نص الشرح والتعريف أسفل الهيرو</label><input class="input" id="set-hero_subtitle" maxlength="300"></div>
+          <div class="field" style="grid-column:1/-1"><label>بيان وميثاق رئيس جمعية الحاسوب (المعروض لطلاب الكلية)</label>
+            <textarea class="textarea" id="set-president_statement" rows="4" maxlength="1500"></textarea></div>
+          <div class="field"><label>عبارة شريط الدورة الانتخابية</label><input class="input" id="set-election_dates" maxlength="120"></div>
+          <div class="field"><label>اسم الجمعية</label><input class="input" id="set-association_name" maxlength="100"></div>
+          <div class="field"><label>اسم الكلية</label><input class="input" id="set-college_name" maxlength="100"></div>
+          <div class="field"><label>اسم الجامعة</label><input class="input" id="set-university_name" maxlength="100"></div>
+          <div class="field" style="grid-column:1/-1"><label>نص تذييل الموقع والحقوق</label><input class="input" id="set-footer_note" maxlength="200"></div>
+        </div>
+        <button class="btn btn-primary" id="saveTexts" style="margin-top:14px">حفظ النصوص والهوية المؤسسية</button>
+      </div>
+
+      <!-- 5. ضوابط ومعايير الاقتراع -->
+      <div class="panel">
+        <h3>ضوابط ومعايير الاقتراع الدستوري</h3>
+        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
+          تحديد الدفعات المصرح لها بالمشاركة والشروط الإلزامية لصحة الصوت.
+        </p>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field" style="grid-column:1/-1">
+            <label>الدفعات الأكاديمية المصرح لها بالاقتراع (مفصولة بفواصل)</label>
+            <input class="input" id="set-allowed_batches" placeholder="مثال: ST20, ST21, ST22, ST23" maxlength="160">
+            <small style="color:var(--ink-2);font-size:.8rem;margin-top:4px;display:block">تُعرض هذه الدفعات في دليل التحقق وشروط النزاهة في الموقع العام.</small>
+          </div>
+        </div>
+        <div class="set-grid" style="margin-top:12px">
+          <div class="switch"><div><b>إلزامية كتابة سبب ومعيار الاختيار</b><span>إلزام الطالب بتوضيح سبب اختياره للمرشح وفق معيار الكفاءة</span></div>
+            <label class="tgl"><input type="checkbox" id="sw-require-reason"><i></i></label></div>
+          <div class="switch"><div><b>إلزامية أداء القسم الشرعي</b><span>إلزام المصوّت بالقسم بالله العظيم قبل إرسال الصوت</span></div>
+            <label class="tgl"><input type="checkbox" id="sw-require-oath"><i></i></label></div>
+        </div>
+        <button class="btn btn-primary" id="saveRules" style="margin-top:14px">حفظ ضوابط الاقتراع</button>
+      </div>
+
+      <!-- 6. قنوات الدعم والتواصل الرئاسي -->
+      <div class="panel">
+        <h3>قنوات الدعم والتواصل الرئاسي</h3>
+        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
+          بيانات التواصل الرسمية المعتمدة لحل نزاعات الطلاب وتلقي البلاغات.
+        </p>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>رقم هاتف الواتساب الرسمي المعتمد</label>
+            <input class="input" id="set-support_whatsapp" placeholder="+249912345678" style="direction:ltr;text-align:right" maxlength="30"></div>
+          <div class="field"><label>البريد الإلكتروني للجنة</label>
+            <input class="input" id="set-support_email" placeholder="csa@iua.edu.sd" style="direction:ltr;text-align:right" maxlength="80"></div>
+        </div>
+        <button class="btn btn-primary" id="saveContact" style="margin-top:14px">حفظ بيانات التواصل</button>
+      </div>
+
+      <!-- 7. أمان اللوحة وكلمة المرور -->
+      <div class="panel">
+        <h3>أمان غرفة الرئاسة – تغيير كلمة المرور</h3>
+        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="field"><label>كلمة المرور الحالية</label><input class="input" type="password" id="pw-old" autocomplete="current-password"></div>
+          <div class="field"><label>الجديدة (8+ خانات)</label><input class="input" type="password" id="pw-new" autocomplete="new-password"></div>
+          <div class="field"><label>تأكيد الجديدة</label><input class="input" type="password" id="pw-new2" autocomplete="new-password"></div>
+        </div>
+        <button class="btn btn-dark" id="savePw" style="margin-top:14px">تغيير كلمة المرور وإنهاء الجلسات الأخرى</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ============ مودال تعديل مرشح ============ -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <button class="modal-close" id="editClose">✕</button>
+      <h3 id="editTitle">تعديل المرشح</h3>
+      <p id="editMeta"></p>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field"><label>الاسم</label><input class="input" id="e-name" maxlength="80"></div>
+        <div class="field"><label>الرقم الجامعي</label><input class="input" id="e-uid" disabled></div>
+        <div class="field"><label>الواتساب</label><input class="input" id="e-wa" maxlength="20"></div>
+        <div class="field"><label>القسم</label><input class="input" id="e-dep" maxlength="80"></div>
+        <div class="field full"><label>المؤهلات</label><textarea class="textarea" id="e-qual" maxlength="4000"></textarea></div>
+        <div class="field full"><label>الخبرات</label><textarea class="textarea" id="e-exp" maxlength="4000"></textarea></div>
+        <div class="field full"><label>الأداء والإنجازات</label><textarea class="textarea" id="e-ach" maxlength="4000"></textarea></div>
+        <div class="field"><label>الحالة</label><select class="select" id="e-status">
+          <option value="pending">بانتظار المراجعة</option>
+          <option value="approved">معتمد</option>
+          <option value="rejected">مرفوض</option>
+        </select></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" id="editCancel" style="flex:1">إلغاء</button>
+        <button class="btn btn-primary" id="editSave" style="flex:1">حفظ التعديلات</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<script src="/js/admin.js?v=65"></script>
+</body>
+</html>

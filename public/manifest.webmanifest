@@ -1,0 +1,27 @@
+{
+  "name": "جمعية الحاسوب – IUA | انتخابات رئيس الجمعية",
+  "short_name": "جمعية الحاسوب",
+  "description": "المنصة الرسمية لترشيح وانتخاب رئيس جمعية الحاسوب بكلية دراسات الحاسوب – جامعة إفريقيا العالمية",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F0F0F",
+  "theme_color": "#10B981",
+  "categories": ["education", "social"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "دليل المرشحين", "url": "/#candidates",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "صوت الأمانة", "url": "/#vote",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "تدقيق الإيصال", "url": "/#verify",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
