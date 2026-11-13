@@ -8,7 +8,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 
-const DATA_DIR = path.join(__dirname, 'data');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const DATA_DIR = process.env.DATA_DIR || (isServerless ? path.join('/tmp', 'csa-data') : path.join(__dirname, 'data'));
 const DB_FILE = path.join(DATA_DIR, 'app.db');
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
