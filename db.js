@@ -194,44 +194,113 @@ function defaultPasswordInUse() {
   );
 }
 
-/* ------------------------- جلسات المدير (بصمة مشفّرة) ------------------------- */
+/* ------------------------- جلسات المدير (توقيع رقمي مشفّر + بصمة) ------------------------- */
 const sha256 = (s) => crypto.createHash('sha256').update(String(s)).digest('hex');
-const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12 ساعة
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 ساعة لجلسة مستقرة
 
-function createSession(ip) {
-  const token = crypto.randomBytes(32).toString('hex');
-  const nowT = new Date();
-  const exp = new Date(nowT.getTime() + SESSION_TTL_MS);
-  db.prepare(
-    'INSERT INTO sessions (token_hash, created_at, expires_at, ip) VALUES (?, ?, ?, ?)'
-  ).run(sha256(token), nowT.toISOString(), exp.toISOString(), ip || '');
-  return token; // يُعاد للعميل مرة واحدة فقط — قاعدة البيانات تحتفظ بالبصمة
+// مفتاح توقيع رقمي ثابت للجلسات لضمان التوافق مع بيئات السيرفرليس (Serverless / Vercel)
+const SESSION_SIGN_SECRET = process.env.SESSION_SECRET || 'csa-election-iua-presidential-session-key-2026';
+
+function signSession(payload) {
+  const jsonStr = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const hmac = crypto.createHmac('sha256', SESSION_SIGN_SECRET).update(jsonStr).digest('base64url');
+  return `${jsonStr}.${hmac}`;
 }
-function getSession(token) {
-  if (!token) return null;
-  const row = db.prepare('SELECT * FROM sessions WHERE token_hash = ?').get(sha256(token));
-  if (!row) return null;
-  if (new Date(row.expires_at) < new Date()) {
-    db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token));
+
+function verifySessionToken(token) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  const [jsonStr, hmac] = token.split('.');
+  if (!jsonStr || !hmac) return null;
+  const expected = crypto.createHmac('sha256', SESSION_SIGN_SECRET).update(jsonStr).digest('base64url');
+  if (hmac !== expected) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(jsonStr, 'base64url').toString('utf8'));
+    if (!payload || !payload.exp || Date.now() > payload.exp) return null;
+    return payload;
+  } catch {
     return null;
   }
-  return row;
 }
+
+function createSession(ip) {
+  const nowT = Date.now();
+  const expT = nowT + SESSION_TTL_MS;
+  const payload = {
+    role: 'admin',
+    ip: ip || '',
+    iat: nowT,
+    exp: expT,
+    rnd: crypto.randomBytes(8).toString('hex')
+  };
+  const token = signSession(payload);
+  try {
+    db.prepare(
+      'INSERT INTO sessions (token_hash, created_at, expires_at, ip) VALUES (?, ?, ?, ?)'
+    ).run(sha256(token), new Date(nowT).toISOString(), new Date(expT).toISOString(), ip || '');
+  } catch (err) {
+    // في بيئات السيرفرليس (Vercel Lambda)، التوقيع الرقمي يضمن الصلاحية بدون اعتمادية على القرص
+  }
+  return token;
+}
+
+function getSession(token) {
+  if (!token) return null;
+  
+  // 1. التحقق الرقمي المشفر (Stateless HMAC verification) يمنع انقطاع الجلسة عبر السيرفرليس
+  const verified = verifySessionToken(token);
+  if (!verified) return null;
+
+  // 2. التحقق من قاعدة البيانات إن وُجدت
+  try {
+    const row = db.prepare('SELECT * FROM sessions WHERE token_hash = ?').get(sha256(token));
+    if (row) {
+      if (new Date(row.expires_at).getTime() < Date.now()) {
+        db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token));
+        return null;
+      }
+      return row;
+    }
+  } catch (err) {}
+
+  // 3. في بيئة Vercel، نقبل التوقيع المشفر السليم لضمان عدم خروج المشرف تلقائياً
+  return {
+    token_hash: sha256(token),
+    created_at: new Date(verified.iat).toISOString(),
+    expires_at: new Date(verified.exp).toISOString(),
+    ip: verified.ip || ''
+  };
+}
+
 function deleteSession(token) {
-  db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token || ''));
+  try {
+    db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token || ''));
+  } catch (err) {}
 }
+
 function purgeSessions() {
-  db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(new Date().toISOString());
+  try {
+    db.prepare('DELETE FROM sessions WHERE expires_at < ?').run(new Date().toISOString());
+  } catch (err) {}
 }
+
 function activeSessions() {
-  return db.prepare(
-    `SELECT created_at, expires_at, ip FROM sessions
-     WHERE expires_at > ? ORDER BY created_at DESC`
-  ).all(new Date().toISOString());
+  try {
+    return db.prepare(
+      `SELECT created_at, expires_at, ip FROM sessions
+       WHERE expires_at > ? ORDER BY created_at DESC`
+    ).all(new Date().toISOString());
+  } catch (err) {
+    return [];
+  }
 }
+
 function revokeOtherSessions(currentToken) {
-  const h = sha256(currentToken || '');
-  return Number(db.prepare('DELETE FROM sessions WHERE token_hash <> ?').run(h).changes);
+  try {
+    const h = sha256(currentToken || '');
+    return Number(db.prepare('DELETE FROM sessions WHERE token_hash <> ?').run(h).changes);
+  } catch (err) {
+    return 0;
+  }
 }
 
 /* ------------------------- أدوات ------------------------- */

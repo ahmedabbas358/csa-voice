@@ -346,6 +346,12 @@ svg {
   gap: 8px;
 }
 
+@media (max-width: 768px) {
+  .nav-cta .btn-primary {
+    display: none !important;
+  }
+}
+
 .topbar-icon-btn {
   width: 38px;
   height: 38px;
@@ -504,12 +510,27 @@ svg {
 }
 
 .app-profile-card {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 24px;
   box-shadow: var(--shadow-sm);
   transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.app-profile-card::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 @media (max-width: 640px) {
@@ -520,10 +541,12 @@ svg {
 }
 
 .app-profile-header {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 18px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
+  z-index: 1;
 }
 
 @media (max-width: 580px) {
@@ -531,7 +554,7 @@ svg {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 14px;
+    gap: 12px;
   }
 }
 
@@ -544,10 +567,11 @@ svg {
   padding: 3px;
   flex-shrink: 0;
   border: 2px solid var(--brand);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
   cursor: pointer;
   user-select: none;
   transition: transform 0.2s ease, border-color 0.2s ease;
+  z-index: 1;
 }
 
 .app-avatar-wrap:hover {
@@ -576,6 +600,7 @@ svg {
 .app-profile-info {
   flex: 1;
   min-width: 0;
+  z-index: 1;
 }
 
 .app-badges-row {
@@ -677,14 +702,19 @@ svg {
 }
 
 .app-pill-primary {
-  background: var(--pill-primary-bg);
-  color: var(--pill-primary-text);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  background: var(--brand-gradient);
+  color: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+  border: 1px solid var(--brand-border);
 }
 
 .app-pill-primary:hover {
   transform: translateY(-1px);
-  filter: brightness(1.08);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+
+.app-pill-btn:active {
+  transform: scale(0.96);
 }
 
 .app-pill-secondary {
@@ -708,22 +738,23 @@ svg {
   background: var(--bg-elevated);
 }
 
-/* Stats Row */
+/* Stats Row — 3 columns compact design */
 .app-stats-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
 }
 
 @media (max-width: 600px) {
   .app-stats-row {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 8px 6px;
+    gap: 4px;
   }
 }
 
@@ -736,10 +767,19 @@ svg {
 }
 
 .app-stat-box b {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
   color: var(--text);
   line-height: 1.2;
+}
+
+@media (max-width: 600px) {
+  .app-stat-box b {
+    font-size: 15px;
+  }
+  .app-stat-box span {
+    font-size: 9.5px;
+  }
 }
 
 .app-stat-box span {
@@ -791,6 +831,12 @@ svg {
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .app-chips-container {
+    display: none !important;
+  }
 }
 
 .app-chips-container::-webkit-scrollbar {
@@ -1970,22 +2016,25 @@ section.alt {
   width: 100%;
 }
 
-/* -------------------- 15. MOBILE BOTTOM TABBAR (YOUTUBE MOBILE SPEC) -------------------- */
+/* -------------------- 15. MOBILE BOTTOM TABBAR (NATIVE SPEC) -------------------- */
 .tabbar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  height: 52px;
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: var(--tabbar-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid var(--border);
   display: none;
   align-items: center;
   justify-content: space-around;
-  padding: 0 4px;
+  padding-left: 6px;
+  padding-right: 6px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
 }
 
 @media (max-width: 768px) {
@@ -2020,6 +2069,10 @@ section.alt {
   transition: transform 0.15s ease;
 }
 
+.tab-item:active {
+  transform: scale(0.92);
+}
+
 .tab-item span {
   font-size: 10px;
   font-weight: 600;
@@ -2036,7 +2089,7 @@ section.alt {
   stroke-width: 2.2;
 }
 
-/* زر الإجراء الأوسط (Center Action Button) - نمط YouTube (+) */
+/* زر الإجراء الأوسط (Center Action Button) - صوتك */
 .tab-center-action {
   display: flex;
   flex-direction: column;
@@ -2048,42 +2101,36 @@ section.alt {
 }
 
 .tab-center-btn {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 1.6px solid var(--text);
-  color: var(--text);
+  background: var(--brand-gradient);
+  border: none;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+  transform: translateY(-5px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tab-center-btn svg {
-  width: 20px;
-  height: 20px;
-  stroke: currentColor;
-  stroke-width: 2.2;
+  width: 22px;
+  height: 22px;
+  stroke: #FFFFFF;
+  stroke-width: 2.4;
 }
 
-.tab-center-action:hover .tab-center-btn,
-.tab-center-action.active .tab-center-btn {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: #FFFFFF;
-  transform: scale(1.08);
+.tab-center-action:active .tab-center-btn {
+  transform: translateY(-2px) scale(0.92);
 }
 
 .tab-center-action span {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
-  margin-top: 2px;
-  color: var(--text-muted);
-}
-
-.tab-center-action:hover span,
-.tab-center-action.active span {
-  color: var(--text);
+  color: var(--brand);
+  margin-top: -2px;
 }
 
 .mobile-home-indicator {

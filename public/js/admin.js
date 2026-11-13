@@ -4,7 +4,7 @@
 'use strict';
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-let TOKEN = sessionStorage.getItem('iua_token') || '';
+let TOKEN = localStorage.getItem('csa_admin_token') || sessionStorage.getItem('iua_token') || '';
 
 function toast(msg, type = 'ok') {
   const wrap = $('#toast-wrap');
@@ -67,6 +67,7 @@ $('#loginForm').addEventListener('submit', async e => {
   try {
     const r = await api('/api/admin/login', { method: 'POST', body: { password: $('#loginPass').value } });
     TOKEN = r.token;
+    localStorage.setItem('csa_admin_token', TOKEN);
     sessionStorage.setItem('iua_token', TOKEN);
     enterApp();
   } catch (ex) {
@@ -76,7 +77,9 @@ $('#loginForm').addEventListener('submit', async e => {
   }
 });
 function logoutLocal() {
-  TOKEN = ''; sessionStorage.removeItem('iua_token');
+  TOKEN = '';
+  localStorage.removeItem('csa_admin_token');
+  sessionStorage.removeItem('iua_token');
   $('#adminApp').classList.remove('on');
   $('#loginVeil').classList.remove('hide');
 }

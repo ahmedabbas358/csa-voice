@@ -219,7 +219,7 @@ async function loadConfig() {
     CFG = await api('/api/config');
     if (CFG.election_title) document.title = CFG.election_title;
     if (CFG.hero_title && $('#heroTitle')) {
-      $('#heroTitle').innerHTML = `انتخاب <em>رئيس الجمعية</em><br><span class="hero-brand-accent">${esc(CFG.election_dates || 'الدورة الرئاسية 2026')}</span>`;
+      $('#heroTitle').innerHTML = `انتخاب <em>رئيس جمعية الحاسوب</em><br><span class="hero-brand-accent">${esc(CFG.college_name || 'كلية دراسات الحاسوب')} · ${esc(CFG.university_name || 'IUA')}</span>`;
     }
     if (CFG.hero_subtitle && $('#heroSubtitle')) {
       $('#heroSubtitle').textContent = CFG.hero_subtitle;
