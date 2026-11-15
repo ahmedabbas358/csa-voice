@@ -1414,6 +1414,40 @@ section.alt {
   margin-bottom: 16px;
 }
 
+.contact-support-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.support-direct-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.support-direct-pill:hover {
+  border-color: var(--brand);
+  background: var(--brand-surface);
+  color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.support-direct-pill svg {
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1690,6 +1724,40 @@ section.alt {
   margin-bottom: 16px;
 }
 
+.contact-support-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.support-direct-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.support-direct-pill:hover {
+  border-color: var(--brand);
+  background: var(--brand-surface);
+  color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.support-direct-pill svg {
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
 .pane-title h4 {
   font-size: 15px;
   font-weight: 800;
@@ -1882,6 +1950,40 @@ section.alt {
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 16px;
+}
+
+.contact-support-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.support-direct-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.support-direct-pill:hover {
+  border-color: var(--brand);
+  background: var(--brand-surface);
+  color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.support-direct-pill svg {
+  color: var(--brand);
+  flex-shrink: 0;
 }
 
 @media (max-width: 600px) {

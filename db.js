@@ -304,16 +304,29 @@ function revokeOtherSessions(currentToken) {
 }
 
 /* ------------------------- أدوات ------------------------- */
-const ID_RE = /^ST(20|21|22)[A-Z0-9_\-\.]{0,24}$/i;
+function getAllowedBatches() {
+  const raw = getSetting('allowed_batches') || 'ST20, ST21, ST22';
+  return raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+}
 
 function normalizeId(raw) {
   return String(raw || '').trim().toUpperCase().replace(/\s+/g, '').slice(0, 28);
 }
 function validId(raw) {
-  return ID_RE.test(normalizeId(raw));
+  const id = normalizeId(raw);
+  if (!id || id.length < 5 || id.length > 28) return false;
+  const batches = getAllowedBatches();
+  if (batches.length === 0) return /^[A-Z0-9_\-\.]{5,28}$/i.test(id);
+  // يجب أن يبدأ بمعرّف إحدى الدفعات المصرح لها
+  return batches.some(b => id.startsWith(b));
 }
 function batchOf(raw) {
-  return normalizeId(raw).slice(0, 4); // ST20 | ST21 | ST22
+  const id = normalizeId(raw);
+  const batches = getAllowedBatches();
+  for (const b of batches) {
+    if (id.startsWith(b)) return b;
+  }
+  return id.slice(0, 4);
 }
 function normalizePhone(raw) {
   return String(raw || '').replace(/[\s\-().]/g, '').slice(0, 20);
@@ -714,7 +727,7 @@ module.exports = {
   db, getSetting, setSetting, allSettings, safeSettings, seedSettings,
   hashPassword, verifyPassword, defaultPasswordInUse,
   createSession, getSession, deleteSession, purgeSessions, activeSessions, revokeOtherSessions,
-  normalizeId, validId, batchOf, validPhone, normalizePhone, cleanText, now,
+  normalizeId, validId, batchOf, getAllowedBatches, validPhone, normalizePhone, cleanText, now,
   audit, clientIp, parseDeviceInfo,
   addCandidate, getCandidate, getCandidateByIdNumber, listCandidates,
   updateCandidate, deleteCandidate, candidateVoteCount,

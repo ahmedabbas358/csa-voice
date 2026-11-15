@@ -114,6 +114,29 @@ tr:hover td{background:#FBFDFC}
 .batchChart .bar i{display:block;height:100%;background:var(--grad);border-radius:99px;transition:width .8s var(--ease)}
 .batchChart .mini{font-variant-numeric:tabular-nums;text-align:left}
 
+/* ---------- هندسة إعدادات الإدارة المتطورة (Settings Cockpit) ---------- */
+.settings-header-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:var(--shadow-sm)}
+.sync-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-size:.8rem;font-weight:800;transition:all .25s ease}
+.sync-badge.in-sync{background:#E4F7EF;color:#0B6A4E;border:1px solid #B8EBD9}
+.sync-badge.dirty{background:#FFF4DC;color:#925C00;border:1px solid #FFE3A3}
+.settings-subnav{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;scrollbar-width:none}
+.settings-subnav::-webkit-scrollbar{display:none}
+.settings-tab-btn{padding:9px 18px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:.86rem;font-weight:700;color:var(--ink-2);cursor:pointer;white-space:nowrap;transition:all .15s ease;display:flex;align-items:center;gap:6px}
+.settings-tab-btn:hover{border-color:var(--brand);color:var(--brand);background:#F0FDF8}
+.settings-tab-btn.on{background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:0 4px 12px rgba(6,23,19,.18)}
+.settings-pane{display:none}
+.settings-pane.active{display:block;animation:min .25s ease}
+.live-preview-box{background:#F8FAFB;border:1.5px dashed var(--line);border-radius:16px;padding:16px;margin-top:14px}
+.live-preview-title{font-size:.78rem;font-weight:800;color:var(--ink-3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.preview-banner-mock{border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:.86rem;font-weight:700;transition:.2s}
+.preview-banner-mock.info{background:#E8F1FE;color:#1D4ED8;border:1px solid #BFDBFE}
+.preview-banner-mock.warning{background:#FFF4DC;color:#925C00;border:1px solid #FDE68A}
+.preview-banner-mock.danger{background:#FDECEC;color:#B91C1C;border:1px solid #FECACA}
+.preview-hero-mock{background:#111827;color:#fff;border-radius:16px;padding:18px;margin-top:8px}
+.preview-hero-mock h4{font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:4px}
+.preview-hero-mock p{font-size:.82rem;color:#9CA3AF;line-height:1.5}
+.preview-hero-mock .accent{color:#10B981;font-size:.8rem;font-weight:700}
+
 @media(max-width:640px){
   .admin-wrap.on{flex-direction:column}
   .side{position:fixed;top:56px;inset-inline:0;height:auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:10px 12px;scrollbar-width:none;z-index:140}
@@ -373,131 +396,197 @@ tr:hover td{background:#FBFDFC}
       </div>
     </section>
 
-    <!-- ===== الإعدادات المتقدمة ===== -->
+    <!-- ===== الإعدادات المتقدمة الشاملة (Settings Cockpit) ===== -->
     <section class="pg hidden" id="p-settings">
-      <!-- 1. أبواب الموقع والمفاتيح الكبرى -->
-      <div class="panel">
-        <h3>المفاتيح التشغيلية الكبرى للمنصة</h3>
-        <div class="set-grid">
-          <div class="switch"><div><b>فتح الاقتراع والتصويت</b><span>السماح للطلاب المؤهلين بالتصويت الفوري</span></div>
-            <label class="tgl"><input type="checkbox" id="sw-voting"><i></i></label></div>
-          <div class="switch"><div><b>فتح باب الترشيح الرئاسي</b><span>السماح بتقديم طلبات ترشح جديدة</span></div>
-            <label class="tgl"><input type="checkbox" id="sw-nom"><i></i></label></div>
-          <div class="switch"><div><b>إعلان النتائج للجمهور</b><span>إظهار الفرز والنسب في واجهة الموقع العام</span></div>
-            <label class="tgl"><input type="checkbox" id="sw-res"><i></i></label></div>
-          <div class="switch"><div><b>اعتماد الترشيح تلقائياً</b><span>اعتماد المرشح فور تسجيله دون الحاجة لمراجعة</span></div>
-            <label class="tgl"><input type="checkbox" id="sw-auto"><i></i></label></div>
+      <!-- شريط حالة المزامنة والحفظ الشامل الموحد -->
+      <div class="settings-header-card">
+        <div>
+          <h2 style="font-size:1.15rem;font-weight:900;margin-bottom:4px;color:var(--ink)">مركز التحكم الشامل بالإعدادات والهوية</h2>
+          <p style="color:var(--ink-2);font-size:.84rem;margin:0">
+            تحديث فوري للمنصة، النصوص، التنبيهات، الصلاحيات وقنوات الدعم مع المزامنة التلقائية.
+          </p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="sync-badge in-sync" id="settingsSyncBadge">✓ جميع الإعدادات متزامنة ومطبقة</span>
+          <button class="btn btn-primary" id="saveAllSettingsBtn" style="padding:10px 20px;font-weight:800;font-size:.88rem">
+            💾 حفظ وتطبيق كافة الإعدادات
+          </button>
         </div>
       </div>
 
-      <!-- 2. موعد إغلاق التصويت التلقائي -->
-      <div class="panel">
-        <h3>الموعد النهائي لإغلاق التصويت</h3>
-        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
-          عند الوصول إلى هذا الموعد يُغلق الاقتراع تلقائياً على مستوى الخادم وتتوقف استقبال الأصوات.
-        </p>
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end">
-          <div class="field"><label>التاريخ والوقت المحدد</label>
-            <input class="input" type="datetime-local" id="set-deadline"></div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-primary" id="saveDeadline">حفظ الموعد</button>
-            <button class="btn btn-ghost" id="clearDeadline">مسح</button>
+      <!-- تبويبات أقسام الإعدادات المتطورة -->
+      <div class="settings-subnav" id="settingsSubnav">
+        <button class="settings-tab-btn on" data-setpane="pane-ops">⚙️ التشغيل والمواعيد</button>
+        <button class="settings-tab-btn" data-setpane="pane-banner">📢 الشريط والتنبيه العاجل</button>
+        <button class="settings-tab-btn" data-setpane="pane-brand">🏛️ الهوية والميثاق الرئاسي</button>
+        <button class="settings-tab-btn" data-setpane="pane-rules">⚖️ معايير ودفعات الاقتراع</button>
+        <button class="settings-tab-btn" data-setpane="pane-contact">📞 قنوات الدعم والتواصل</button>
+        <button class="settings-tab-btn" data-setpane="pane-security">🔐 الأمان وكلمة المرور</button>
+      </div>
+
+      <!-- 1. قسم التشغيل والمواعيد -->
+      <div class="settings-pane active" id="pane-ops">
+        <div class="panel">
+          <h3>المفاتيح التشغيلية الكبرى للمنصة</h3>
+          <div class="set-grid">
+            <div class="switch"><div><b>فتح الاقتراع والتصويت</b><span>السماح للطلاب المؤهلين بالتصويت الفوري</span></div>
+              <label class="tgl"><input type="checkbox" id="sw-voting"><i></i></label></div>
+            <div class="switch"><div><b>فتح باب الترشيح الرئاسي</b><span>السماح بتقديم طلبات ترشح جديدة</span></div>
+              <label class="tgl"><input type="checkbox" id="sw-nom"><i></i></label></div>
+            <div class="switch"><div><b>إعلان النتائج للجمهور</b><span>إظهار الفرز والنسب في واجهة الموقع العام</span></div>
+              <label class="tgl"><input type="checkbox" id="sw-res"><i></i></label></div>
+            <div class="switch"><div><b>اعتماد الترشيح تلقائياً</b><span>اعتماد المرشح فور تسجيله دون الحاجة لمراجعة</span></div>
+              <label class="tgl"><input type="checkbox" id="sw-auto"><i></i></label></div>
           </div>
         </div>
-        <p class="mini" id="deadlineState" style="margin-top:10px"></p>
-      </div>
 
-      <!-- 3. شريط التنبيه والإعلان العاجل -->
-      <div class="panel">
-        <h3>شريط الإعلان والتنبيه العاجل للطلاب</h3>
-        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
-          يظهر هذا الشريط في أعلى تطبيق الويب العام فور تفعيله لتبليغ الطلاب بالمستجدات أو التنبيهات الرئاسية العاجلة.
-        </p>
-        <div class="set-grid" style="margin-bottom:14px">
-          <div class="switch"><div><b>تفعيل الشريط العاجل</b><span>إظهار الشريط الإعلاني في أعلى واجهة الموقع</span></div>
-            <label class="tgl"><input type="checkbox" id="sw-banner-enabled"><i></i></label></div>
-        </div>
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr 200px;gap:12px">
-          <div class="field"><label>نص التنبيه أو الإعلان العاجل</label>
-            <input class="input" id="set-banner_text" placeholder="مثال: تنبيه رئاسي: متبقي ساعتان على إغلاق باب الاقتراع" maxlength="200"></div>
-          <div class="field"><label>نوع / مستوى التنبيه</label>
-            <select class="select" id="set-banner_level">
-              <option value="info">إرشادي / إخباري (Info)</option>
-              <option value="warning">تنبيه هام (Warning)</option>
-              <option value="danger">عاجل وطارئ (Critical)</option>
-            </select>
+        <div class="panel">
+          <h3>الموعد النهائي لإغلاق التصويت التلقائي</h3>
+          <p style="color:var(--ink-2);font-size:.88rem;margin-bottom:12px">
+            عند الوصول إلى هذا الموعد يُغلق الاقتراع تلقائياً على مستوى الخادم وتتوقف استقبال الأصوات.
+          </p>
+          <div class="form-grid" style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end">
+            <div class="field"><label>التاريخ والوقت المحدد</label>
+              <input class="input" type="datetime-local" id="set-deadline"></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" id="saveDeadline">حفظ الموعد</button>
+              <button class="btn btn-ghost" id="clearDeadline">مسح</button>
+            </div>
           </div>
+          <p class="mini" id="deadlineState" style="margin-top:10px"></p>
         </div>
-        <button class="btn btn-primary" id="saveBanner" style="margin-top:12px">حفظ إعدادات التنبيه العاجل</button>
       </div>
 
-      <!-- 4. الهوية والنصوص والميثاق الرئاسي -->
-      <div class="panel">
-        <h3>الهوية والمؤسسة والميثاق الرئاسي</h3>
-        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
-          التحكم الكامل في النصوص، الميثاق الرئاسي، وبيانات الصرح الأكاديمي.
-        </p>
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>عنوان المنصة (في شريط المتصفح)</label><input class="input" id="set-election_title" maxlength="120"></div>
-          <div class="field"><label>عنوان الهيرو الرئيسي</label><input class="input" id="set-hero_title" maxlength="90"></div>
-          <div class="field" style="grid-column:1/-1"><label>نص الشرح والتعريف أسفل الهيرو</label><input class="input" id="set-hero_subtitle" maxlength="300"></div>
-          <div class="field" style="grid-column:1/-1"><label>بيان وميثاق رئيس جمعية الحاسوب (المعروض لطلاب الكلية)</label>
-            <textarea class="textarea" id="set-president_statement" rows="4" maxlength="1500"></textarea></div>
-          <div class="field"><label>عبارة شريط الدورة الانتخابية</label><input class="input" id="set-election_dates" maxlength="120"></div>
-          <div class="field"><label>اسم الجمعية</label><input class="input" id="set-association_name" maxlength="100"></div>
-          <div class="field"><label>اسم الكلية</label><input class="input" id="set-college_name" maxlength="100"></div>
-          <div class="field"><label>اسم الجامعة</label><input class="input" id="set-university_name" maxlength="100"></div>
-          <div class="field" style="grid-column:1/-1"><label>نص تذييل الموقع والحقوق</label><input class="input" id="set-footer_note" maxlength="200"></div>
-        </div>
-        <button class="btn btn-primary" id="saveTexts" style="margin-top:14px">حفظ النصوص والهوية المؤسسية</button>
-      </div>
-
-      <!-- 5. ضوابط ومعايير الاقتراع -->
-      <div class="panel">
-        <h3>ضوابط ومعايير الاقتراع الدستوري</h3>
-        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
-          تحديد الدفعات المصرح لها بالمشاركة والشروط الإلزامية لصحة الصوت.
-        </p>
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field" style="grid-column:1/-1">
-            <label>الدفعات الأكاديمية المصرح لها بالاقتراع (مفصولة بفواصل)</label>
-            <input class="input" id="set-allowed_batches" placeholder="مثال: ST20, ST21, ST22, ST23" maxlength="160">
-            <small style="color:var(--ink-2);font-size:.8rem;margin-top:4px;display:block">تُعرض هذه الدفعات في دليل التحقق وشروط النزاهة في الموقع العام.</small>
+      <!-- 2. قسم الشريط الإعلاني العاجل مع المعاينة الحية -->
+      <div class="settings-pane" id="pane-banner">
+        <div class="panel">
+          <h3>شريط الإعلان والتنبيه العاجل للطلاب</h3>
+          <p style="color:var(--ink-2);font-size:.88rem;margin-bottom:12px">
+            يظهر هذا الشريط في أعلى تطبيق الويب العام فور تفعيله لتبليغ الطلاب بالمستجدات أو التنبيهات الرئاسية العاجلة.
+          </p>
+          <div class="set-grid" style="margin-bottom:14px">
+            <div class="switch"><div><b>تفعيل الشريط العاجل</b><span>إظهار الشريط الإعلاني في أعلى واجهة الموقع</span></div>
+              <label class="tgl"><input type="checkbox" id="sw-banner-enabled"><i></i></label></div>
           </div>
+          <div class="form-grid" style="display:grid;grid-template-columns:1fr 200px;gap:12px">
+            <div class="field"><label>نص التنبيه أو الإعلان العاجل</label>
+              <input class="input" id="set-banner_text" placeholder="مثال: تنبيه رئاسي: متبقي ساعتان على إغلاق باب الاقتراع" maxlength="200"></div>
+            <div class="field"><label>نوع / مستوى التنبيه</label>
+              <select class="select" id="set-banner_level">
+                <option value="info">إرشادي / إخباري (Info - أزرق)</option>
+                <option value="warning">تنبيه هام (Warning - أصفر)</option>
+                <option value="danger">عاجل وطارئ (Critical - أحمر)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- بطاقة المعاينة الحية للشريط العاجل -->
+          <div class="live-preview-box">
+            <div class="live-preview-title">
+              <span>👁️ معاينة حية فورية كما سيظهر للطلاب في أعلى التطبيق:</span>
+            </div>
+            <div id="previewBannerBox" class="preview-banner-mock info">
+              <span id="previewBannerIcon">🔔</span>
+              <span id="previewBannerText">تنبيه رئاسي رسمي: الدورة الانتخابية مفتوحة للاقتراع الدستوري.</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="saveBanner" style="margin-top:14px">حفظ إعدادات التنبيه العاجل</button>
         </div>
-        <div class="set-grid" style="margin-top:12px">
-          <div class="switch"><div><b>إلزامية كتابة سبب ومعيار الاختيار</b><span>إلزام الطالب بتوضيح سبب اختياره للمرشح وفق معيار الكفاءة</span></div>
-            <label class="tgl"><input type="checkbox" id="sw-require-reason"><i></i></label></div>
-          <div class="switch"><div><b>إلزامية أداء القسم الشرعي</b><span>إلزام المصوّت بالقسم بالله العظيم قبل إرسال الصوت</span></div>
-            <label class="tgl"><input type="checkbox" id="sw-require-oath"><i></i></label></div>
-        </div>
-        <button class="btn btn-primary" id="saveRules" style="margin-top:14px">حفظ ضوابط الاقتراع</button>
       </div>
 
-      <!-- 6. قنوات الدعم والتواصل الرئاسي -->
-      <div class="panel">
-        <h3>قنوات الدعم والتواصل الرئاسي</h3>
-        <p style="color:var(--ink-2);font-size:.9rem;margin-bottom:12px">
-          بيانات التواصل الرسمية المعتمدة لحل نزاعات الطلاب وتلقي البلاغات.
-        </p>
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>رقم هاتف الواتساب الرسمي المعتمد</label>
-            <input class="input" id="set-support_whatsapp" placeholder="+249912345678" style="direction:ltr;text-align:right" maxlength="30"></div>
-          <div class="field"><label>البريد الإلكتروني للجنة</label>
-            <input class="input" id="set-support_email" placeholder="csa@iua.edu.sd" style="direction:ltr;text-align:right" maxlength="80"></div>
+      <!-- 3. قسم الهوية والميثاق الرئاسي مع المعاينة الحية -->
+      <div class="settings-pane" id="pane-brand">
+        <div class="panel">
+          <h3>الهوية والمؤسسة والميثاق الرئاسي</h3>
+          <p style="color:var(--ink-2);font-size:.88rem;margin-bottom:12px">
+            التحكم الكامل في النصوص الرسمية، بيان وميثاق رئيس الجمعية، وبيانات الصرح الأكاديمي.
+          </p>
+          <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><label>عنوان المنصة (في شريط المتصفح)</label><input class="input" id="set-election_title" maxlength="120"></div>
+            <div class="field"><label>عنوان الهيرو الرئيسي</label><input class="input" id="set-hero_title" maxlength="90"></div>
+            <div class="field" style="grid-column:1/-1"><label>نص الشرح والتعريف أسفل الهيرو</label><input class="input" id="set-hero_subtitle" maxlength="300"></div>
+            <div class="field" style="grid-column:1/-1"><label>بيان وميثاق رئيس جمعية الحاسوب (المعروض لطلاب الكلية)</label>
+              <textarea class="textarea" id="set-president_statement" rows="4" maxlength="1500"></textarea></div>
+            <div class="field"><label>عبارة شريط الدورة الانتخابية</label><input class="input" id="set-election_dates" maxlength="120"></div>
+            <div class="field"><label>اسم الجمعية</label><input class="input" id="set-association_name" maxlength="100"></div>
+            <div class="field"><label>اسم الكلية</label><input class="input" id="set-college_name" maxlength="100"></div>
+            <div class="field"><label>اسم الجامعة</label><input class="input" id="set-university_name" maxlength="100"></div>
+            <div class="field" style="grid-column:1/-1"><label>نص تذييل الموقع والحقوق</label><input class="input" id="set-footer_note" maxlength="200"></div>
+          </div>
+
+          <!-- بطاقة المعاينة الحية لواجهة الهيرو -->
+          <div class="live-preview-box">
+            <div class="live-preview-title">
+              <span>👁️ معاينة حية فورية لواجهة بروفايل التطبيق (Hero Section):</span>
+            </div>
+            <div class="preview-hero-mock">
+              <span class="accent" id="prevHeroBadge">• الدورة الانتخابية مفتوحة</span>
+              <h4 id="prevHeroTitle">انتخاب رئيس جمعية الحاسوب</h4>
+              <div class="accent" style="margin-bottom:6px" id="prevHeroSubBrand">كلية دراسات الحاسوب · جامعة إفريقيا العالمية</div>
+              <p id="prevHeroDesc">المنصة الرسمية المعتمدة للاقتراع الرئاسي المشفّر.</p>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="saveTexts" style="margin-top:14px">حفظ النصوص والهوية المؤسسية</button>
         </div>
-        <button class="btn btn-primary" id="saveContact" style="margin-top:14px">حفظ بيانات التواصل</button>
       </div>
 
-      <!-- 7. أمان اللوحة وكلمة المرور -->
-      <div class="panel">
-        <h3>أمان غرفة الرئاسة – تغيير كلمة المرور</h3>
-        <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-          <div class="field"><label>كلمة المرور الحالية</label><input class="input" type="password" id="pw-old" autocomplete="current-password"></div>
-          <div class="field"><label>الجديدة (8+ خانات)</label><input class="input" type="password" id="pw-new" autocomplete="new-password"></div>
-          <div class="field"><label>تأكيد الجديدة</label><input class="input" type="password" id="pw-new2" autocomplete="new-password"></div>
+      <!-- 4. قسم ضوابط ومعايير الاقتراع -->
+      <div class="settings-pane" id="pane-rules">
+        <div class="panel">
+          <h3>ضوابط ومعايير الاقتراع الدستوري</h3>
+          <p style="color:var(--ink-2);font-size:.88rem;margin-bottom:12px">
+            تحديد الدفعات المصرح لها بالمشاركة والشروط الإلزامية لصحة الصوت.
+          </p>
+          <div class="form-grid" style="display:grid;grid-template-columns:1fr;gap:12px">
+            <div class="field">
+              <label>الدفعات الأكاديمية المصرح لها بالاقتراع (مفصولة بفواصل)</label>
+              <input class="input" id="set-allowed_batches" placeholder="مثال: ST20, ST21, ST22, ST23" maxlength="160">
+              <small style="color:var(--ink-2);font-size:.8rem;margin-top:4px;display:block">يتم التحقق تلقائياً من الرقم الجامعي بناءً على هذه الدفعات وتحديث تبويبات الفرز في دليل المرشحين.</small>
+            </div>
+          </div>
+          <div class="set-grid" style="margin-top:14px">
+            <div class="switch"><div><b>إلزامية كتابة سبب ومعيار الاختيار</b><span>إلزام الطالب بتوضيح سبب اختياره للمرشح وفق معيار الكفاءة</span></div>
+              <label class="tgl"><input type="checkbox" id="sw-require-reason"><i></i></label></div>
+            <div class="switch"><div><b>إلزامية أداء القسم الشرعي</b><span>إلزام المصوّت بالقسم بالله العظيم قبل إرسال الصوت</span></div>
+              <label class="tgl"><input type="checkbox" id="sw-require-oath"><i></i></label></div>
+          </div>
+          <button class="btn btn-primary" id="saveRules" style="margin-top:14px">حفظ ضوابط ومعايير الاقتراع</button>
         </div>
-        <button class="btn btn-dark" id="savePw" style="margin-top:14px">تغيير كلمة المرور وإنهاء الجلسات الأخرى</button>
+      </div>
+
+      <!-- 5. قسم قنوات الدعم والتواصل -->
+      <div class="settings-pane" id="pane-contact">
+        <div class="panel">
+          <h3>قنوات الدعم والتواصل الرئاسي</h3>
+          <p style="color:var(--ink-2);font-size:.88rem;margin-bottom:12px">
+            بيانات التواصل الرسمية المعتمدة لحل نزاعات الطلاب وتلقي البلاغات الفورية.
+          </p>
+          <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field"><label>رقم هاتف الواتساب الرسمي المعتمد</label>
+              <input class="input" id="set-support_whatsapp" placeholder="+249912345678" style="direction:ltr;text-align:right" maxlength="30"></div>
+            <div class="field"><label>البريد الإلكتروني للجنة</label>
+              <input class="input" id="set-support_email" placeholder="csa@iua.edu.sd" style="direction:ltr;text-align:right" maxlength="80"></div>
+          </div>
+          <button class="btn btn-primary" id="saveContact" style="margin-top:14px">حفظ بيانات التواصل</button>
+        </div>
+      </div>
+
+      <!-- 6. قسم الأمان وكلمة المرور -->
+      <div class="settings-pane" id="pane-security">
+        <div class="panel">
+          <h3>أمان غرفة الرئاسة – تغيير كلمة المرور</h3>
+          <p style="color:var(--ink-2);font-size:.88rem;margin-bottom:12px">
+            تحديث كلمة المرور الدستورية وإنهاء كافة الجلسات النشطة على الأجهزة الأخرى فورياً.
+          </p>
+          <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <div class="field"><label>كلمة المرور الحالية</label><input class="input" type="password" id="pw-old" autocomplete="current-password"></div>
+            <div class="field"><label>الجديدة (8+ خانات)</label><input class="input" type="password" id="pw-new" autocomplete="new-password"></div>
+            <div class="field"><label>تأكيد الجديدة</label><input class="input" type="password" id="pw-new2" autocomplete="new-password"></div>
+          </div>
+          <button class="btn btn-dark" id="savePw" style="margin-top:14px">تغيير كلمة المرور وإنهاء الجلسات الأخرى</button>
+        </div>
       </div>
     </section>
   </div>

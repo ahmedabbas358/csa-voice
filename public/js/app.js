@@ -217,24 +217,48 @@ function startCountdown(iso) {
 async function loadConfig() {
   try {
     CFG = await api('/api/config');
-    if (CFG.election_title) document.title = CFG.election_title;
-    if (CFG.hero_title && $('#heroTitle')) {
-      $('#heroTitle').innerHTML = `انتخاب <em>رئيس جمعية الحاسوب</em><br><span class="hero-brand-accent">${esc(CFG.college_name || 'كلية دراسات الحاسوب')} · ${esc(CFG.university_name || 'IUA')}</span>`;
+    if (CFG.election_title) {
+      document.title = CFG.election_title;
+    }
+    
+    // 1. عنوان الهيرو الرئيسي
+    if ($('#heroTitle')) {
+      const title = CFG.hero_title || 'انتخاب رئيس جمعية الحاسوب';
+      const col = CFG.college_name || 'كلية دراسات الحاسوب';
+      const univ = CFG.university_name || 'جامعة إفريقيا العالمية (IUA)';
+      $('#heroTitle').innerHTML = `${esc(title)}<br><span class="hero-brand-accent">${esc(col)} · ${esc(univ)}</span>`;
     }
     if (CFG.hero_subtitle && $('#heroSubtitle')) {
       $('#heroSubtitle').textContent = CFG.hero_subtitle;
     }
+
+    // 2. اسم الجمعية والكلية والجامعة عبر كافة عناصر الواجهة
+    const assocName = CFG.association_name || 'جمعية الحاسوب';
+    const colName = CFG.college_name || 'كلية دراسات الحاسوب';
+    const univName = CFG.university_name || 'IUA';
+    $$('.brand-title').forEach(el => el.textContent = assocName);
+    $$('.brand-sub').forEach(el => el.textContent = `${colName} · ${univName}`);
+
+    // 3. الشهادات الرسمية
+    if ($('#certUnivName')) $('#certUnivName').textContent = 'جمهورية السودان · ' + (CFG.university_name || 'جامعة إفريقيا العالمية');
+    if ($('#certColName')) $('#certColName').textContent = (CFG.college_name || 'كلية دراسات الحاسوب') + ' – أمانة الشؤون العلمية والطلابية';
+    if ($('#certElecDates')) $('#certElecDates').textContent = (CFG.election_title || 'انتخابات رئاسة جمعية الحاسوب') + (CFG.election_dates ? ' – ' + CFG.election_dates : '');
+
+    // 4. مواعيد الدورة والميثاق والتذييل
+    if (CFG.election_dates && $('#pillDates')) $('#pillDates').textContent = CFG.election_dates;
     if (CFG.president_statement) {
       const full = $('#presStatementFull');
       if (full) full.textContent = `«${CFG.president_statement}»`;
     }
-    if (CFG.election_dates && $('#pillDates')) $('#pillDates').textContent = CFG.election_dates;
-    if (CFG.footer_note && $('#footNote')) $('#footNote').textContent = CFG.footer_note;
+    if ($('#footNote')) {
+      $('#footNote').textContent = CFG.footer_note || `${assocName} – ${colName}، ${CFG.university_name || 'جامعة إفريقيا العالمية'}. المنصة التقنية الرسمية للاقتراع الرئاسي المشفّر.`;
+    }
 
-    // شريط التنبيه والإعلان العاجل
+    // 5. شريط التنبيه والإعلان الرئاسي العاجل
     const banner = $('#urgentBanner');
     if (banner) {
-      if (CFG.banner_enabled && CFG.banner_text) {
+      const isBannerOn = CFG.banner_enabled === '1' || CFG.banner_enabled === 1 || CFG.banner_enabled === true;
+      if (isBannerOn && CFG.banner_text) {
         banner.style.display = 'block';
         if ($('#urgentBannerText')) $('#urgentBannerText').textContent = CFG.banner_text;
         banner.className = 'app-urgent-banner banner-' + (CFG.banner_level || 'info');
@@ -243,14 +267,35 @@ async function loadConfig() {
       }
     }
 
-    if (!CFG.nominations_open) lockSection('nominate', 'الترشيح مغلق', 'تم إغلاق باب الترشيح من إدارة جمعية الحاسوب.');
+    // 6. قنوات الدعم والتواصل
+    if (CFG.support_whatsapp && $('#supportWaLink')) {
+      const cleanWa = String(CFG.support_whatsapp).replace(/[^\d+]/g, '');
+      $('#supportWaLink').href = `https://wa.me/${cleanWa.replace('+', '')}?text=${encodeURIComponent('السلام عليكم، استفسار بخصوص انتخابات جمعية الحاسوب')}`;
+      const waTxt = $('#supportWaText');
+      if (waTxt) waTxt.textContent = CFG.support_whatsapp;
+    }
+    if (CFG.support_email && $('#supportMailLink')) {
+      $('#supportMailLink').href = `mailto:${CFG.support_email}`;
+      const mailTxt = $('#supportMailText');
+      if (mailTxt) mailTxt.textContent = CFG.support_email;
+    }
+
+    // 7. تحديث تبويبات الفلترة للدفعات
+    renderCandidateChips();
+
+    // 8. إغلاق / فتح الاقتراع والترشيح
+    if (!CFG.nominations_open) {
+      lockSection('nominate', 'الترشيح مغلق', 'تم إغلاق باب الترشيح من إدارة جمعية الحاسوب.');
+    }
     if (!CFG.voting_open) {
       if (!getLocalVoted()) {
         lockSection('vote', 'الاقتراع مغلق', 'سيُفتح الاقتراع في موعده المعتمد من إدارة الجمعية.');
       }
     }
     startCountdown(CFG.voting_deadline);
-  } catch { /* الاحتفاظ بالنصوص الافتراضية */ }
+  } catch (err) {
+    console.warn('loadConfig fallback:', err);
+  }
 }
 if ($('#dismissBanner')) {
   $('#dismissBanner').addEventListener('click', () => {
@@ -298,15 +343,15 @@ let candQuery = '';
 function renderCandidateChips() {
   const box = $('#candChips');
   if (!box) return;
-  const batches = [...new Set(CANDIDATES.map(c => c.batch).filter(Boolean))].sort();
-  if (batches.length <= 1) {
-    box.innerHTML = `<button class="chip-btn on" data-batch="all">جميع المرشحين</button>`;
-    return;
-  }
-  let html = `<button class="chip-btn ${candBatch === 'all' ? 'on' : ''}" data-batch="all">جميع المرشحين (${CANDIDATES.length})</button>`;
-  batches.forEach(b => {
+  const cfgBatches = (CFG.allowed_batches || 'ST20, ST21, ST22')
+    .split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+  const candBatches = [...new Set(CANDIDATES.map(c => c.batch).filter(Boolean))];
+  const allBatches = [...new Set([...cfgBatches, ...candBatches])].sort();
+
+  let html = `<button class="chip-btn ${candBatch === 'all' ? 'on' : ''}" data-batch="all">الكل (${CANDIDATES.length})</button>`;
+  allBatches.forEach(b => {
     const count = CANDIDATES.filter(c => c.batch === b).length;
-    html += `<button class="chip-btn ${candBatch === b ? 'on' : ''}" data-batch="${esc(b)}">${esc(b)} (${count})</button>`;
+    html += `<button class="chip-btn ${candBatch === b ? 'on' : ''}" data-batch="${esc(b)}">${esc(b)}${count > 0 ? ` (${count})` : ''}</button>`;
   });
   box.innerHTML = html;
 }
@@ -1124,3 +1169,23 @@ loadConfig();
 loadCandidates();
 loadStats();
 loadResults();
+
+// المزامنة الحية الفورية عند عودة التركيز للنافذة أو تغيير التبويب
+window.addEventListener('focus', () => {
+  loadConfig();
+  loadCandidates();
+  loadStats();
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    loadConfig();
+    loadCandidates();
+    loadStats();
+  }
+});
+setInterval(() => {
+  if (!document.hidden) {
+    loadConfig();
+    loadStats();
+  }
+}, 25000);

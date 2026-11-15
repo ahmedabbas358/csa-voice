@@ -600,32 +600,164 @@ $('#backupBtn').addEventListener('click', async () => {
 /* ============================================================
    الإعدادات
    ============================================================ */
+/* ============================================================
+   الإعدادات المتطورة (Settings Cockpit & Live Sync)
+   ============================================================ */
+let isSettingsDirty = false;
+
+function markSettingsDirty(dirty = true) {
+  isSettingsDirty = dirty;
+  const badge = $('#settingsSyncBadge');
+  if (!badge) return;
+  if (dirty) {
+    badge.className = 'sync-badge dirty';
+    badge.textContent = '⚠️ يوجد تعديلات غير محفوظة!';
+  } else {
+    badge.className = 'sync-badge in-sync';
+    badge.textContent = '✓ جميع الإعدادات متزامنة ومطبقة';
+  }
+}
+
+function updateBannerPreview() {
+  const box = $('#previewBannerBox');
+  const txt = $('#previewBannerText');
+  const ico = $('#previewBannerIcon');
+  if (!box || !txt) return;
+
+  const isEnabled = $('#sw-banner-enabled') && $('#sw-banner-enabled').checked;
+  const textVal = $('#set-banner_text') ? $('#set-banner_text').value.trim() : '';
+  const levelVal = $('#set-banner_level') ? $('#set-banner_level').value : 'info';
+
+  box.className = 'preview-banner-mock ' + levelVal;
+  if (!isEnabled) {
+    box.style.opacity = '0.55';
+    txt.textContent = textVal ? `[معطّل] ${textVal}` : '(شريط التنبيه معطّل حالياً ولن يظهر للطلاب)';
+    if (ico) ico.textContent = '⏸️';
+  } else {
+    box.style.opacity = '1';
+    txt.textContent = textVal || 'تنبيه رئاسي رسمي: الدورة الانتخابية مفتوحة للاقتراع الدستوري.';
+    if (ico) ico.textContent = levelVal === 'danger' ? '🚨' : (levelVal === 'warning' ? '⚠️' : '🔔');
+  }
+}
+
+function updateHeroPreview() {
+  const t = $('#prevHeroTitle');
+  const b = $('#prevHeroBadge');
+  const s = $('#prevHeroSubBrand');
+  const d = $('#prevHeroDesc');
+  if (t) t.textContent = $('#set-hero_title') ? ($('#set-hero_title').value || 'انتخاب رئيس جمعية الحاسوب') : 'انتخاب رئيس جمعية الحاسوب';
+  if (b) b.textContent = $('#set-election_dates') ? ($('#set-election_dates').value || '• الدورة الانتخابية مفتوحة') : '• الدورة الانتخابية مفتوحة';
+  if (s) {
+    const col = $('#set-college_name') ? ($('#set-college_name').value || 'كلية دراسات الحاسوب') : 'كلية دراسات الحاسوب';
+    const univ = $('#set-university_name') ? ($('#set-university_name').value || 'IUA') : 'IUA';
+    s.textContent = `${col} · ${univ}`;
+  }
+  if (d) d.textContent = $('#set-hero_subtitle') ? ($('#set-hero_subtitle').value || 'المنصة الرسمية المعتمدة للاقتراع الرئاسي المشفّر.') : 'المنصة الرسمية المعتمدة للاقتراع الرئاسي المشفّر.';
+}
+
 function applySettings(s) {
-  $('#sw-voting').checked = s.voting_open === '1';
-  $('#sw-nom').checked = s.nominations_open === '1';
-  $('#sw-res').checked = s.results_public === '1';
-  $('#sw-auto').checked = s.auto_approve === '1';
+  if ($('#sw-voting')) $('#sw-voting').checked = s.voting_open === '1';
+  if ($('#sw-nom')) $('#sw-nom').checked = s.nominations_open === '1';
+  if ($('#sw-res')) $('#sw-res').checked = s.results_public === '1';
+  if ($('#sw-auto')) $('#sw-auto').checked = s.auto_approve === '1';
   if ($('#sw-banner-enabled')) $('#sw-banner-enabled').checked = s.banner_enabled === '1';
   if ($('#set-banner_text')) $('#set-banner_text').value = s.banner_text || '';
   if ($('#set-banner_level')) $('#set-banner_level').value = s.banner_level || 'info';
   if ($('#set-election_title')) $('#set-election_title').value = s.election_title || '';
-  $('#set-hero_title').value = s.hero_title || '';
-  $('#set-hero_subtitle').value = s.hero_subtitle || '';
+  if ($('#set-hero_title')) $('#set-hero_title').value = s.hero_title || '';
+  if ($('#set-hero_subtitle')) $('#set-hero_subtitle').value = s.hero_subtitle || '';
   if ($('#set-president_statement')) $('#set-president_statement').value = s.president_statement || '';
-  $('#set-election_dates').value = s.election_dates || '';
+  if ($('#set-election_dates')) $('#set-election_dates').value = s.election_dates || '';
   if ($('#set-association_name')) $('#set-association_name').value = s.association_name || '';
   if ($('#set-college_name')) $('#set-college_name').value = s.college_name || '';
   if ($('#set-university_name')) $('#set-university_name').value = s.university_name || '';
-  $('#set-footer_note').value = s.footer_note || '';
+  if ($('#set-footer_note')) $('#set-footer_note').value = s.footer_note || '';
   if ($('#set-allowed_batches')) $('#set-allowed_batches').value = s.allowed_batches || '';
   if ($('#sw-require-reason')) $('#sw-require-reason').checked = s.require_reason !== '0';
   if ($('#sw-require-oath')) $('#sw-require-oath').checked = s.require_oath !== '0';
   if ($('#set-support_whatsapp')) $('#set-support_whatsapp').value = s.support_whatsapp || '';
   if ($('#set-support_email')) $('#set-support_email').value = s.support_email || '';
   const dl = s.voting_deadline || '';
-  $('#set-deadline').value = dl ? toLocalInput(dl) : '';
+  if ($('#set-deadline')) $('#set-deadline').value = dl ? toLocalInput(dl) : '';
   renderDeadlineState(dl);
+
+  updateBannerPreview();
+  updateHeroPreview();
+  markSettingsDirty(false);
 }
+
+// تبويبات الإعدادات
+$$('#settingsSubnav .settings-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$('#settingsSubnav .settings-tab-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    const targetPaneId = btn.dataset.setpane;
+    $$('#p-settings .settings-pane').forEach(p => p.classList.remove('active'));
+    const pane = $('#' + targetPaneId);
+    if (pane) pane.classList.add('active');
+  });
+});
+
+// مراقبة التغييرات في أي حقل لتحديث المعاينة ووضع الحالة
+$$('#p-settings input, #p-settings textarea, #p-settings select').forEach(input => {
+  input.addEventListener('input', () => {
+    markSettingsDirty(true);
+    updateBannerPreview();
+    updateHeroPreview();
+  });
+  input.addEventListener('change', () => {
+    markSettingsDirty(true);
+    updateBannerPreview();
+    updateHeroPreview();
+  });
+});
+
+async function saveAllSettings() {
+  const body = {
+    voting_open: $('#sw-voting') && $('#sw-voting').checked ? '1' : '0',
+    nominations_open: $('#sw-nom') && $('#sw-nom').checked ? '1' : '0',
+    results_public: $('#sw-res') && $('#sw-res').checked ? '1' : '0',
+    auto_approve: $('#sw-auto') && $('#sw-auto').checked ? '1' : '0',
+    voting_deadline: $('#set-deadline') ? $('#set-deadline').value : '',
+    banner_enabled: $('#sw-banner-enabled') && $('#sw-banner-enabled').checked ? '1' : '0',
+    banner_text: $('#set-banner_text') ? $('#set-banner_text').value : '',
+    banner_level: $('#set-banner_level') ? $('#set-banner_level').value : 'info',
+    election_title: $('#set-election_title') ? $('#set-election_title').value : '',
+    hero_title: $('#set-hero_title') ? $('#set-hero_title').value : '',
+    hero_subtitle: $('#set-hero_subtitle') ? $('#set-hero_subtitle').value : '',
+    president_statement: $('#set-president_statement') ? $('#set-president_statement').value : '',
+    election_dates: $('#set-election_dates') ? $('#set-election_dates').value : '',
+    association_name: $('#set-association_name') ? $('#set-association_name').value : '',
+    college_name: $('#set-college_name') ? $('#set-college_name').value : '',
+    university_name: $('#set-university_name') ? $('#set-university_name').value : '',
+    footer_note: $('#set-footer_note') ? $('#set-footer_note').value : '',
+    allowed_batches: $('#set-allowed_batches') ? $('#set-allowed_batches').value : '',
+    require_reason: $('#sw-require-reason') && $('#sw-require-reason').checked ? '1' : '0',
+    require_oath: $('#sw-require-oath') && $('#sw-require-oath').checked ? '1' : '0',
+    support_whatsapp: $('#set-support_whatsapp') ? $('#set-support_whatsapp').value : '',
+    support_email: $('#set-support_email') ? $('#set-support_email').value : ''
+  };
+
+  const btn = $('#saveAllSettingsBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جارِ الحفظ والتطبيق…'; }
+
+  try {
+    await api('/api/admin/settings', { method: 'PUT', body });
+    toast('تم حفظ وتطبيق كافة الإعدادات على المنصة بنجاح!', 'ok');
+    const me = await api('/api/admin/me');
+    applySettings(me.settings);
+    markSettingsDirty(false);
+  } catch (err) {
+    toast(err.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 حفظ وتطبيق كافة الإعدادات'; }
+  }
+}
+
+if ($('#saveAllSettingsBtn')) {
+  $('#saveAllSettingsBtn').addEventListener('click', saveAllSettings);
+}
+
 function toLocalInput(iso) {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
@@ -657,6 +789,7 @@ $('#clearDeadline').addEventListener('click', async () => {
     toast('تم مسح موعد الإغلاق', 'ok');
     $('#set-deadline').value = '';
     renderDeadlineState('');
+    markSettingsDirty(false);
   } catch (e) { toast(e.message, 'err'); }
 });
 const toggleMap = {
@@ -675,6 +808,7 @@ Object.keys(toggleMap).forEach(id => {
       try {
         await api('/api/admin/settings', { method: 'PUT', body: { [toggleMap[id]]: e.target.checked ? '1' : '0' } });
         toast('تم تحديث الإعداد بنجاح', 'ok');
+        updateBannerPreview();
       } catch (ex) { toast(ex.message, 'err'); e.target.checked = !e.target.checked; }
     });
   }
@@ -687,7 +821,9 @@ if ($('#saveBanner')) {
         banner_text: $('#set-banner_text') ? $('#set-banner_text').value : '',
         banner_level: $('#set-banner_level') ? $('#set-banner_level').value : 'info'
       }});
-      toast('تم حفظ إعدادات الشريط الإعلاني العاجل', 'ok');
+      toast('تم حفظ إعدادات الشريط الإعلاني العاجل بنجاح', 'ok');
+      const me = await api('/api/admin/me');
+      applySettings(me.settings);
     } catch (e) { toast(e.message, 'err'); }
   });
 }
@@ -706,6 +842,8 @@ if ($('#saveTexts')) {
         footer_note: $('#set-footer_note').value
       }});
       toast('تم حفظ النصوص والهوية المؤسسية بنجاح', 'ok');
+      const me = await api('/api/admin/me');
+      applySettings(me.settings);
     } catch (e) { toast(e.message, 'err'); }
   });
 }
@@ -718,6 +856,8 @@ if ($('#saveRules')) {
         require_oath: $('#sw-require-oath') && $('#sw-require-oath').checked ? '1' : '0'
       }});
       toast('تم حفظ ضوابط ومعايير الاقتراع بنجاح', 'ok');
+      const me = await api('/api/admin/me');
+      applySettings(me.settings);
     } catch (e) { toast(e.message, 'err'); }
   });
 }
@@ -729,6 +869,8 @@ if ($('#saveContact')) {
         support_email: $('#set-support_email') ? $('#set-support_email').value : ''
       }});
       toast('تم حفظ بيانات وقنوات التواصل بنجاح', 'ok');
+      const me = await api('/api/admin/me');
+      applySettings(me.settings);
     } catch (e) { toast(e.message, 'err'); }
   });
 }
