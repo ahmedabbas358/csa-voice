@@ -292,7 +292,7 @@ async function loadConfig() {
         nomForm.style.display = 'none';
       } else {
         nomNotice.style.display = 'none';
-        nomForm.style.display = 'grid';
+        nomForm.style.display = '';
       }
     }
 
@@ -304,7 +304,7 @@ async function loadConfig() {
         voteWizard.style.display = 'none';
       } else {
         voteNotice.style.display = 'none';
-        voteWizard.style.display = 'block';
+        voteWizard.style.display = '';
       }
     }
 

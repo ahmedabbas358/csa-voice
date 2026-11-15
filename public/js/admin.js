@@ -698,30 +698,8 @@ $$('#settingsSubnav .settings-tab-btn').forEach(btn => {
   });
 });
 
-// مراقبة التغييرات في أي حقل لتحديث المعاينة ووضع الحالة
-$$('#p-settings input, #p-settings textarea, #p-settings select').forEach(input => {
-  input.addEventListener('input', () => {
-    markSettingsDirty(true);
-    updateBannerPreview();
-    updateHeroPreview();
-  });
-  input.addEventListener('change', () => {
-    markSettingsDirty(true);
-    updateBannerPreview();
-    updateHeroPreview();
-  });
-});
-
-function notifyConfigUpdated() {
-  try {
-    const bc = new BroadcastChannel('csa_channel');
-    bc.postMessage({ type: 'CONFIG_UPDATED', timestamp: Date.now() });
-    localStorage.setItem('csa_cfg_version', String(Date.now()));
-  } catch {}
-}
-
-async function saveAllSettings() {
-  const body = {
+function collectSettingsFormData() {
+  return {
     voting_open: $('#sw-voting') && $('#sw-voting').checked ? '1' : '0',
     nominations_open: $('#sw-nom') && $('#sw-nom').checked ? '1' : '0',
     results_public: $('#sw-res') && $('#sw-res').checked ? '1' : '0',
@@ -745,7 +723,56 @@ async function saveAllSettings() {
     support_whatsapp: $('#set-support_whatsapp') ? $('#set-support_whatsapp').value : '',
     support_email: $('#set-support_email') ? $('#set-support_email').value : ''
   };
+}
 
+let autoSaveTimer = null;
+function triggerAutoSave() {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    saveAllSettingsSilently();
+  }, 700);
+}
+
+async function saveAllSettingsSilently() {
+  const body = collectSettingsFormData();
+  try {
+    await api('/api/admin/settings', { method: 'PUT', body });
+    notifyConfigUpdated();
+    markSettingsDirty(false);
+  } catch (err) {
+    console.warn('Auto-save err:', err);
+  }
+}
+
+// مراقبة التغييرات في أي حقل لتحديث المعاينة والتطبيق التلقائي الفوري
+$$('#p-settings input, #p-settings textarea, #p-settings select').forEach(input => {
+  input.addEventListener('input', () => {
+    markSettingsDirty(true);
+    updateBannerPreview();
+    updateHeroPreview();
+    triggerAutoSave();
+  });
+  input.addEventListener('change', () => {
+    markSettingsDirty(true);
+    updateBannerPreview();
+    updateHeroPreview();
+    triggerAutoSave();
+  });
+  input.addEventListener('blur', () => {
+    saveAllSettingsSilently();
+  });
+});
+
+function notifyConfigUpdated() {
+  try {
+    const bc = new BroadcastChannel('csa_channel');
+    bc.postMessage({ type: 'CONFIG_UPDATED', timestamp: Date.now() });
+    localStorage.setItem('csa_cfg_version', String(Date.now()));
+  } catch {}
+}
+
+async function saveAllSettings() {
+  const body = collectSettingsFormData();
   const btn = $('#saveAllSettingsBtn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ جارِ الحفظ والتطبيق…'; }
 
@@ -1226,10 +1253,39 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape') closeEdit();
 });
 
+function initAdminTheme() {
+  const saved = localStorage.getItem('csa_theme') || 'dark';
+  applyAdminTheme(saved);
+  const toggleBtn = $('#adminThemeToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyAdminTheme(next);
+    });
+  }
+}
+function applyAdminTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('csa_theme', theme);
+  const sun = $('#adminThemeToggle .icon-sun');
+  const moon = $('#adminThemeToggle .icon-moon');
+  if (sun && moon) {
+    if (theme === 'dark') {
+      sun.style.display = 'inline';
+      moon.style.display = 'none';
+    } else {
+      sun.style.display = 'none';
+      moon.style.display = 'inline';
+    }
+  }
+}
+
 /* ============================================================
    الإقلاع: جرّب الجلسة المحفوظة
    ============================================================ */
 (async function boot() {
+  initAdminTheme();
   if (TOKEN) {
     try {
       await api('/api/admin/me');
