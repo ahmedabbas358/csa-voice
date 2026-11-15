@@ -712,6 +712,14 @@ $$('#p-settings input, #p-settings textarea, #p-settings select').forEach(input 
   });
 });
 
+function notifyConfigUpdated() {
+  try {
+    const bc = new BroadcastChannel('csa_channel');
+    bc.postMessage({ type: 'CONFIG_UPDATED', timestamp: Date.now() });
+    localStorage.setItem('csa_cfg_version', String(Date.now()));
+  } catch {}
+}
+
 async function saveAllSettings() {
   const body = {
     voting_open: $('#sw-voting') && $('#sw-voting').checked ? '1' : '0',
@@ -743,6 +751,7 @@ async function saveAllSettings() {
 
   try {
     await api('/api/admin/settings', { method: 'PUT', body });
+    notifyConfigUpdated();
     toast('تم حفظ وتطبيق كافة الإعدادات على المنصة بنجاح!', 'ok');
     const me = await api('/api/admin/me');
     applySettings(me.settings);
@@ -778,6 +787,7 @@ $('#saveDeadline').addEventListener('click', async () => {
   const v = $('#set-deadline').value;
   try {
     await api('/api/admin/settings', { method: 'PUT', body: { voting_deadline: v } });
+    notifyConfigUpdated();
     toast(v ? 'تم حفظ موعد إغلاق التصويت' : 'تم مسح الموعد', 'ok');
     const me = await api('/api/admin/me');
     applySettings(me.settings);
@@ -786,6 +796,7 @@ $('#saveDeadline').addEventListener('click', async () => {
 $('#clearDeadline').addEventListener('click', async () => {
   try {
     await api('/api/admin/settings', { method: 'PUT', body: { voting_deadline: '' } });
+    notifyConfigUpdated();
     toast('تم مسح موعد الإغلاق', 'ok');
     $('#set-deadline').value = '';
     renderDeadlineState('');
@@ -807,7 +818,8 @@ Object.keys(toggleMap).forEach(id => {
     el.addEventListener('change', async e => {
       try {
         await api('/api/admin/settings', { method: 'PUT', body: { [toggleMap[id]]: e.target.checked ? '1' : '0' } });
-        toast('تم تحديث الإعداد بنجاح', 'ok');
+        notifyConfigUpdated();
+        toast('تم تحديث الإعداد وتطبيقه بنجاح', 'ok');
         updateBannerPreview();
       } catch (ex) { toast(ex.message, 'err'); e.target.checked = !e.target.checked; }
     });
@@ -821,6 +833,7 @@ if ($('#saveBanner')) {
         banner_text: $('#set-banner_text') ? $('#set-banner_text').value : '',
         banner_level: $('#set-banner_level') ? $('#set-banner_level').value : 'info'
       }});
+      notifyConfigUpdated();
       toast('تم حفظ إعدادات الشريط الإعلاني العاجل بنجاح', 'ok');
       const me = await api('/api/admin/me');
       applySettings(me.settings);
@@ -841,6 +854,7 @@ if ($('#saveTexts')) {
         university_name: $('#set-university_name') ? $('#set-university_name').value : '',
         footer_note: $('#set-footer_note').value
       }});
+      notifyConfigUpdated();
       toast('تم حفظ النصوص والهوية المؤسسية بنجاح', 'ok');
       const me = await api('/api/admin/me');
       applySettings(me.settings);
@@ -855,6 +869,7 @@ if ($('#saveRules')) {
         require_reason: $('#sw-require-reason') && $('#sw-require-reason').checked ? '1' : '0',
         require_oath: $('#sw-require-oath') && $('#sw-require-oath').checked ? '1' : '0'
       }});
+      notifyConfigUpdated();
       toast('تم حفظ ضوابط ومعايير الاقتراع بنجاح', 'ok');
       const me = await api('/api/admin/me');
       applySettings(me.settings);
@@ -868,6 +883,7 @@ if ($('#saveContact')) {
         support_whatsapp: $('#set-support_whatsapp') ? $('#set-support_whatsapp').value : '',
         support_email: $('#set-support_email') ? $('#set-support_email').value : ''
       }});
+      notifyConfigUpdated();
       toast('تم حفظ بيانات وقنوات التواصل بنجاح', 'ok');
       const me = await api('/api/admin/me');
       applySettings(me.settings);

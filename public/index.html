@@ -33,7 +33,7 @@
     caches.keys().then(k => { for (const c of k) caches.delete(c); });
   }
 </script>
-<link rel="stylesheet" href="/css/style.css?v=65">
+<link rel="stylesheet" href="/css/style.css?v=70">
 </head>
 <body>
 
@@ -317,6 +317,13 @@
     </div>
 
     <div class="form-card reveal" id="voteCard">
+      <!-- إشعار إغلاق الاقتراع القابل للتبديل ديناميكياً بدون إتلاف النموذج -->
+      <div id="voteLockedNotice" class="res-locked" style="padding:44px 20px;border:0;display:none">
+        <div class="big">⛔</div>
+        <b id="voteLockedTitle">الاقتراع مغلق</b>
+        <p id="voteLockedMsg" style="margin-top:8px">سيُفتح الاقتراع في موعده المعتمد من إدارة الجمعية.</p>
+      </div>
+
       <div class="wizard" id="voteWizard">
         <div class="wiz-head">
           <div class="wiz-steps" aria-hidden="true">
@@ -437,6 +444,13 @@
 
     <div class="form-card reveal" id="nominateCard">
       <div class="form-card-badge">طلب الترشح الرسمي · كلية دراسات الحاسوب</div>
+      <!-- إشعار إغلاق الترشيح القابل للتبديل ديناميكياً بدون إتلاف النموذج -->
+      <div id="nominateLockedNotice" class="res-locked" style="padding:44px 20px;border:0;display:none">
+        <div class="big">⛔</div>
+        <b id="nominateLockedTitle">الترشيح مغلق</b>
+        <p id="nominateLockedMsg" style="margin-top:8px">تم إغلاق باب الترشيح من إدارة جمعية الحاسوب.</p>
+      </div>
+
       <form id="nominateForm" class="form-grid" novalidate>
         <div class="field">
           <label>الاسم الكامل رباعياً <em>*</em></label>
@@ -831,6 +845,6 @@
   </div>
 </div>
 
-<script src="/js/app.js?v=65"></script>
+<script src="/js/app.js?v=70"></script>
 </body>
 </html>

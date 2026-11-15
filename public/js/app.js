@@ -283,15 +283,34 @@ async function loadConfig() {
     // 7. تحديث تبويبات الفلترة للدفعات
     renderCandidateChips();
 
-    // 8. إغلاق / فتح الاقتراع والترشيح
-    if (!CFG.nominations_open) {
-      lockSection('nominate', 'الترشيح مغلق', 'تم إغلاق باب الترشيح من إدارة جمعية الحاسوب.');
-    }
-    if (!CFG.voting_open) {
-      if (!getLocalVoted()) {
-        lockSection('vote', 'الاقتراع مغلق', 'سيُفتح الاقتراع في موعده المعتمد من إدارة الجمعية.');
+    // 8. إغلاق / فتح الاقتراع والترشيح ديناميكياً وبدون إتلاف النموذج في الـ DOM
+    const nomNotice = $('#nominateLockedNotice');
+    const nomForm = $('#nominateForm');
+    if (nomNotice && nomForm) {
+      if (!CFG.nominations_open) {
+        nomNotice.style.display = 'block';
+        nomForm.style.display = 'none';
+      } else {
+        nomNotice.style.display = 'none';
+        nomForm.style.display = 'grid';
       }
     }
+
+    const voteNotice = $('#voteLockedNotice');
+    const voteWizard = $('#voteWizard');
+    if (voteNotice && voteWizard && !getLocalVoted()) {
+      if (!CFG.voting_open) {
+        voteNotice.style.display = 'block';
+        voteWizard.style.display = 'none';
+      } else {
+        voteNotice.style.display = 'none';
+        voteWizard.style.display = 'block';
+      }
+    }
+
+    // 9. تحديث النتائج فورياً وفق وضع النتائج العام
+    loadResults();
+
     startCountdown(CFG.voting_deadline);
   } catch (err) {
     console.warn('loadConfig fallback:', err);
@@ -305,10 +324,15 @@ if ($('#dismissBanner')) {
 }
 
 function lockSection(id, title, msg) {
-  const card = $('#' + id + 'Card');
-  if (card && !getLocalVoted()) {
-    card.innerHTML = `<div class="res-locked" style="padding:44px 20px;border:0">
-      <div class="big">⛔</div><b>${esc(title)}</b>${esc(msg)}</div>`;
+  const notice = $('#' + id + 'LockedNotice');
+  const target = id === 'vote' ? $('#voteWizard') : $('#' + id + 'Form');
+  if (notice && target && !getLocalVoted()) {
+    notice.style.display = 'block';
+    target.style.display = 'none';
+    const tEl = $('#' + id + 'LockedTitle');
+    const mEl = $('#' + id + 'LockedMsg');
+    if (tEl && title) tEl.textContent = title;
+    if (mEl && msg) mEl.textContent = msg;
   }
 }
 
@@ -1170,17 +1194,40 @@ loadCandidates();
 loadStats();
 loadResults();
 
+// المزامنة الحية الفورية (BroadcastChannel + LocalStorage Storage Event)
+try {
+  const bc = new BroadcastChannel('csa_channel');
+  bc.onmessage = (e) => {
+    if (e.data && e.data.type === 'CONFIG_UPDATED') {
+      loadConfig();
+      loadCandidates();
+      loadStats();
+      loadResults();
+    }
+  };
+} catch {}
+window.addEventListener('storage', (e) => {
+  if (e.key === 'csa_cfg_version') {
+    loadConfig();
+    loadCandidates();
+    loadStats();
+    loadResults();
+  }
+});
+
 // المزامنة الحية الفورية عند عودة التركيز للنافذة أو تغيير التبويب
 window.addEventListener('focus', () => {
   loadConfig();
   loadCandidates();
   loadStats();
+  loadResults();
 });
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
     loadConfig();
     loadCandidates();
     loadStats();
+    loadResults();
   }
 });
 setInterval(() => {
